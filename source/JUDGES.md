@@ -2,7 +2,7 @@
 
 *Two minutes to install, three and a half minutes to believe.*
 
-1. **Install:** download [`release/armogoat-1.0.0.tgz`](https://github.com/Cribl-Community/cc-armo-exorcism/raw/main/release/armogoat-1.0.0.tgz), then in Cribl go to **Apps → Import from file**.
+1. **Install:** download [`tgz/armogoat-1.0.0.tgz`](https://github.com/Cribl-Community/cc-armo-exorcism/raw/main/tgz/armogoat-1.0.0.tgz), then in Cribl go to **Apps → Import from file**.
 2. **Open** The Church of Goat. **Turn the sound on.** Press F11.
 3. **Follow the ritual.** There is one big button per screen. `→` presses it, `S` opens the Scripture, `M` mutes.
 

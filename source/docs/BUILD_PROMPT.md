@@ -162,7 +162,7 @@ WebAudio buffer bus. Unlock it on the first user click (the invitation YES). Cue
 12. The release build contains no sandbox code (grep `dist/` for `goat_sandbox` returns nothing) and no tenant URLs, org ids or secrets anywhere in the repo.
 
 ## 11. Submission deliverables (after acceptance passes)
-- `npm run package` → copy the `.tgz` to `release/` → GitHub Release `v1.0.0` with the `.tgz` attached and the 3 install steps in the notes.
+- `npm run package` → copy the `.tgz` to `tgz/` → GitHub Release `v1.0.0` with the `.tgz` attached and the 3 install steps in the notes.
 - Record `docs/media/hero.gif` (≤ 8 MB, the Façade crack → "DO YOU BELIEVE IN THE GOAT?"), plus screenshots of the exorcism with Scripture open and of the report.
 - Fill in `<VERSION>` (the Cribl version of our trial tenant), `<REPO_URL>` and `<VIDEO_URL>` placeholders in README and JUDGES.
 - Video: follow the shot list in dossier §12.6.

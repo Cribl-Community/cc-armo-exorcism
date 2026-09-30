@@ -81,7 +81,7 @@ tgz/        the installable app package
 
 ## License
 
-Apache License 2.0. See [LICENSE](./LICENSE).
+Apache License 2.0. See [LICENSE](https://github.com/Cribl-Community/cc-armo-exorcism/blob/main/LICENSE).
 
 ## App Metadata
 
@@ -95,7 +95,7 @@ Apache License 2.0. See [LICENSE](./LICENSE).
 | Support Label | Community Built |
 | Support Contact | https://github.com/Cribl-Community/cc-armo-exorcism/issues |
 | License | Apache-2.0 |
-| License File | [Apache License 2.0](./LICENSE) |
+| License File | [Apache License 2.0](https://github.com/Cribl-Community/cc-armo-exorcism/blob/main/LICENSE) |
 | Product Tags | stream, search |
 | Category | Observability (Occult) |
 | Audience | end-user |

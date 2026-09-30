@@ -733,16 +733,16 @@ LICENSE                          Apache-2.0
 docs/CHURCH_OF_GOAT_DESIGN.md    this dossier: architecture, real-vs-simulated, safety model
 docs/BUILD_PROMPT.md
 docs/media/                      hero GIF (≤ 8 MB), screenshots, video thumbnail
-release/armogoat-<version>.tgz   also attached to the GitHub Release (judges look in one or the other)
+tgz/armogoat-<version>.tgz   also attached to the GitHub Release (judges look in one or the other)
 src/ backend/ config/ public/    full source, so judges can audit or rebuild
 ```
 - **GitHub Release `v1.0.0`**, with the `.tgz` attached and release notes that repeat the 3 install steps.
 - Put the **hero GIF at the top of README** (the Façade cracking into "DO YOU BELIEVE IN THE GOAT?"). It hooks judges before they install anything.
 - Make sure the repo contains **no trial tenant URLs, org ids, tokens or `.env` files**. The app has no secrets by design (the platform injects auth).
-- `node_modules`, `dist` and `backend-build` stay git-ignored (already the case); the `.tgz` in `release/` is the only committed build artifact.
+- `node_modules`, `dist` and `backend-build` stay git-ignored (already the case); the `.tgz` in `tgz/` is the only committed build artifact.
 
 ### 12.5 Judge install flow (what JUDGES.md says)
-1. Download `armogoat-<version>.tgz` from the Release (or `release/`).
+1. Download `armogoat-<version>.tgz` from the Release (or the `tgz/` folder).
 2. Cribl → **Apps → Import from file** → upload → review the declared permissions (read-only plus preview) → install.
 3. Open **The Church of Goat** → follow the ritual (~3.5 min, sound on, fullscreen recommended).
 
@@ -790,7 +790,7 @@ changes or deletes Cribl configuration. It works on any tenant, including an emp
 Tested on Cribl <VERSION> (Cribl.Cloud trial).
 
 ## Installation
-1. Download `armogoat-<version>.tgz` from Releases (or `release/`).
+1. Download `armogoat-<version>.tgz` from Releases (or the `tgz/` folder).
 2. Cribl → Apps → Import from file → upload → install.
 3. Open **The Church of Goat**. Sound on. Fullscreen recommended.
 
