@@ -88,3 +88,43 @@
   font-size: clamp(0.6rem, 0.95vw, 0.95rem);
   line-height: 1.1;
 }
+
+/* ── Costume layer over the portraits ─────────────────────────────────── */
+
+.tarot__img { filter: saturate(1.05) contrast(1.05); }
+.tarot__face::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 60%, rgb(0 0 0 / 0.35)); pointer-events: none; }
+
+.costume { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 1; }
+.costume text { font-family: var(--r-font-mono, monospace); }
+
+.costume__blueprint line { stroke: #19e3c9; stroke-width: 0.25; opacity: 0.55; }
+.costume__trace { fill: none; stroke: #19e3c9; stroke-width: 0.8; filter: drop-shadow(0 0 1.5px #19e3c9); }
+.costume__node { fill: rgb(25 227 201 / 0.18); stroke: #19e3c9; stroke-width: 0.5; }
+.costume__label { font-size: 3.6px; fill: #b8fff3; font-weight: 700; }
+.costume__orbit ellipse { fill: none; stroke: #19e3c9; stroke-width: 0.9; stroke-dasharray: 3 2.2; filter: drop-shadow(0 0 2px #19e3c9); animation: costume-flow 4s linear infinite; }
+.costume__mote { fill: #ffc857; filter: drop-shadow(0 0 2px #ffc857); }
+.costume__glyph { font-size: 11px; filter: drop-shadow(0 0 3px #19e3c9); }
+
+.costume__rain text { font-size: 5px; fill: #5cff9d; opacity: 0.75; filter: drop-shadow(0 0 1.5px #5cff9d); animation: costume-rain 1.6s steps(2) infinite; }
+.costume__rain text:nth-child(even) { animation-delay: 0.4s; }
+.costume__cables path { fill: none; stroke: #1b1424; stroke-width: 2.2; stroke-linecap: round; }
+.costume__cables path + path { stroke: #7a3cff; }
+.costume__plug { fill: #d6c6a5; stroke: #1b1424; stroke-width: 0.6; }
+.costume__seal rect { fill: rgb(179 18 46 / 0.85); stroke: #ffd6dc; stroke-width: 0.6; }
+.costume__seal text { font-size: 5.2px; font-weight: 700; fill: #fff; letter-spacing: 0.4px; }
+
+.costume__crown path { fill: #f5c542; stroke: #6b4a0b; stroke-width: 0.7; stroke-linejoin: round; filter: drop-shadow(0 0 3px rgb(245 197 66 / 0.8)); }
+.costume__crown .costume__crown-band { fill: #d9a21b; }
+.costume__jewel { fill: #d7263d; }
+.costume__jewel--teal { fill: #19e3c9; }
+.costume__arrow { fill: none !important; stroke: #1a9e57 !important; stroke-width: 1.1 !important; filter: none !important; }
+
+.costume__rays path { fill: rgb(255 246 214 / 0.22); }
+.costume__halo { fill: none; stroke: #f5c542; stroke-width: 1.8; filter: drop-shadow(0 0 3px #f5c542); animation: costume-glow 2.6s ease-in-out infinite; }
+.costume__sparks path { fill: #fff3c4; filter: drop-shadow(0 0 2px #f5c542); animation: costume-glow 1.8s ease-in-out infinite; }
+
+@keyframes costume-flow { to { stroke-dashoffset: -10.4; } }
+@keyframes costume-rain { 50% { opacity: 0.25; } }
+@keyframes costume-glow { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) { .costume * { animation: none !important; } }

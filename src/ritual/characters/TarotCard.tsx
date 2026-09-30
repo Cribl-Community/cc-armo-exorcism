@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import type { Character } from './characters';
+import { Costume, type CostumeKind } from './Costume';
 import './tarot.css';
 
 interface TarotCardProps {
@@ -10,12 +11,14 @@ interface TarotCardProps {
   consent?: boolean;
   glyph: string;
   hue: Character['hue'];
+  /** Costume layer over the portrait (only drawn when the image shows). */
+  costume?: CostumeKind;
   /** Extra art rendered over the card face (e.g. a leaking crate). */
   children?: ReactNode;
   size?: 'md' | 'lg';
 }
 
-export function TarotCard({ arcana, title, subtitle, image, consent = true, glyph, hue, children, size = 'md' }: TarotCardProps) {
+export function TarotCard({ arcana, title, subtitle, image, consent = true, glyph, hue, costume, children, size = 'md' }: TarotCardProps) {
   const [broken, setBroken] = useState(false);
   const showImage = Boolean(image) && consent && !broken;
   return (
@@ -29,7 +32,10 @@ export function TarotCard({ arcana, title, subtitle, image, consent = true, glyp
       <div className="tarot__numeral">{arcana}</div>
       <div className="tarot__face">
         {showImage ? (
-          <img src={image} alt="" className="tarot__img" onError={() => setBroken(true)} draggable={false} />
+          <>
+            <img src={image} alt="" className="tarot__img" onError={() => setBroken(true)} draggable={false} />
+            {costume && <Costume kind={costume} />}
+          </>
         ) : (
           <span className="tarot__glyph" aria-hidden="true">{glyph}</span>
         )}
@@ -53,6 +59,7 @@ export function CharacterCard({ character, size }: { character: Character; size?
       consent={character.consent}
       glyph={character.glyph}
       hue={character.hue}
+      costume={character.costume}
       size={size}
     />
   );

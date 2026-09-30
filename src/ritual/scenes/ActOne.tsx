@@ -190,7 +190,7 @@ export function Prophecy() {
                 aria-label={`Sacrifice ${o.title}`}
               >
                 {o.id === 'ceo' ? (
-                  <TarotCard arcana={o.arcana} title={ceo.name} subtitle={ceo.title} image={ceo.image} consent={ceo.consent} glyph={ceo.glyph} hue={ceo.hue} />
+                  <TarotCard arcana={o.arcana} title={ceo.name} subtitle={ceo.title} image={ceo.image} consent={ceo.consent} glyph={ceo.glyph} hue={ceo.hue} costume={ceo.costume} />
                 ) : o.id === 'pipeline' ? (
                   <TarotCard arcana={o.arcana} title="THE PIPELINE" subtitle={pipe} glyph={o.glyph} hue={o.hue} />
                 ) : (

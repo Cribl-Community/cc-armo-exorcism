@@ -51,7 +51,7 @@ export function Sacrifice() {
           <div className="r-altar">
             <div className="r-altar__card">
               {chosen === 'ceo'
-                ? <TarotCard arcana="IV" title={ceo.name} subtitle={ceo.title} image={ceo.image} consent={ceo.consent} glyph={ceo.glyph} hue={ceo.hue} />
+                ? <TarotCard arcana="IV" title={ceo.name} subtitle={ceo.title} image={ceo.image} consent={ceo.consent} glyph={ceo.glyph} hue={ceo.hue} costume={ceo.costume} />
                 : chosen === 'pipeline'
                   ? <TarotCard arcana="VII" title="THE PIPELINE" subtitle={pipelineOffering(state.census?.pipelines.value)} glyph="📡" hue="teal" />
                   : <TarotCard arcana="IX" title="1 GB OF LOGS" subtitle="lightly used" glyph="📦" hue="blood" />}
