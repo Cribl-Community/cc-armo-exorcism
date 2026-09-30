@@ -361,6 +361,8 @@ Clean Capra card, no jokes except the title *"What the Goat actually did."*
 
 ## 5. DATA FLOW
 
+> **Verified on a live tenant:** §16.3 holds the request formats that actually work (epoch-second metrics, 20 s preview, one combined preview call, derived stage counts, text/plain KV). Where this section differs, §16.3 wins.
+
 ### 5.1 Startup (during the Façade)
 ```
 getCriblUser() ─────────────────────────────► state.judge
@@ -902,3 +904,30 @@ See **[`BUILD_PROMPT.md`](./BUILD_PROMPT.md)**. It's self-contained and can go s
 | `/m/{g}/preview` and `/preview?product=stream` | ⚠ 200, `items: []`, *"Preview results may be incomplete due to process timeout"* after ~5.1 s | The `timeout: 5000` we sent was shorter than the preview process's boot time → pass 2 with 20 s. **Design impact:** start the exorcism request when the judge enters Rite 7 so the result is ready by the Rite 8 click; the staged progress bar covers the rest |
 | KV `PUT` (application/json object) | ⚠ 201, but read back as the literal `[object Object]` | The store keeps the request body as text → pass 2 tests `text/plain` + `JSON.stringify` |
 | Search datasets / job / results | ✅ 21 datasets incl. `cribl_internal_logs`; job queued → completed in ~17 s; results are NDJSON (first line = job meta) | Start the Heresy Scrolls job during the Façade so it's done by Rite 5. The job response echoes the user's email and roles: never display the raw job object |
+
+### Pass 2 — 2026-09-30 (same tenant)
+
+| Area | Result | Consequence |
+|---|---|---|
+| Metrics time range | Relative strings (`-1h`, `-24h`) → **0 rows** in every variant. Epoch **seconds or ms** → rows (572,486 `total.in_events` in the last hour). No time range → the whole retention window (15,655,038) | **Always send epoch seconds** for `earliest`/`latest` |
+| `where` / `splitBys` variants | Only tested with relative times (so inconclusive) | Retest in the build with epoch times; don't depend on them |
+| `health.inputs` by `input` (spec example) | ✅ 34 rows; 4 inputs at `2` (Red), 2 at `1` (Yellow), even though `/system/status/inputs` reported all Green | **HERESY = inputs with `health.inputs > 0`** (last 15 min) + Leader error messages from `/system/info` |
+| `GET /system/metrics` | Empty result | Not used |
+| `/m/{g}/preview` with `timeout: 20000` (no `memory`) | ✅ Exorcism 9.4 s: 8 in → 5 out; `password=[BLESSED]`, `666→🐐🐐🐐`, `purified_by`, `blessing` (md5); `sampled: 3` on the kept debug event; **both goats untouched with `curse=666`** | Exorcism is real, and "THE GOAT RESISTED" is exactly the engine output |
+| Preview `stats` | **Not returned** (no `stats` key) | Per-stage counts are **derived from the engine output**: every output event keeps its input `__id`, so dropped (banished), sampled (tithed), masked, anointed and resisted counts are exact. Bytes are computed from input vs output events (fields not starting with `__`) |
+| Goatify preview | ✅ 8.3 s; Eval + Rename worked (`cisco_asa → GOAT_CISCO_ASA_RITUAL`, `CryptoLake → THE_HOLY_CRYPTOLAKE`, `mortal_name` set) | Real names become real goat names |
+| KV encoding | `PUT` with `content-type: text/plain` + `JSON.stringify(doc)` → 201 and an identical read-back. `application/json` with a string literal → 400 | **KV = text/plain JSON strings.** `POST /kvstore/keys {prefix}` returns a JSON array of key names |
+
+### 16.3 Locked-in request formats (these supersede §5 where they differ)
+
+- **Metrics:** Leader only, `POST /system/metrics/query`.
+  - Totals: `{earliest: now−86400, latest: now, aggs: {aggregations: ['sum("total.in_events").as("events")', 'sum("total.in_bytes").as("bytes")', 'sum("total.dropped_events").as("dropped")'], cumulative: true}}` (epoch seconds).
+  - Series: same with `earliest: now−3600, aggs.timeWindowSeconds: 60`.
+  - Heresy: `{earliest: now−900, latest: now, aggs: {aggregations: ['max("health.inputs").as("health")'], cumulative: true, splitBys: ['input']}}`.
+- **Preview:** `POST /m/{g}/preview` with `timeout: 20000`, **no `memory`**, client abort at 28 s (the proxy gives up at 30 s). Fallback: `/preview?product=stream`, then the local emulator.
+  - Latency is **8–10 s per call**, so the app sends **one combined call** (exorcism + goatify events, each function filtered on a `rite` field).
+  - It fires when the judge clicks **SUMMON THE BUILDERS** (Rite 5 → 6). The builders' dialogue and the Priestess (about 30 s) cover the wait, and the Rite 8 progress bar holds at 97 % if the call is still running. Scripture shows the call as "The builders began the rite".
+- **Per-stage counts:** derived from the engine output by `__id`, not from `stats.functions`.
+- **KV:** `text/plain` body = `JSON.stringify(doc)`; `GET` returns the same text; a 404 means empty.
+- **Search:** start the job during the Façade (it takes ~17 s); results are NDJSON with the job meta on line 1. Never display the raw job object (it echoes the user's email and roles).
+- **Leftover probe keys** in this tenant's app KV: `church/probe`, `church/probe-text`. They're harmless and get removed with the probe.
