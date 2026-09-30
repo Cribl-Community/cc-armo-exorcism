@@ -7,7 +7,8 @@ import { Goat } from '../goat/Goat';
 import { TarotCard } from '../characters/TarotCard';
 import { CHARACTERS } from '../characters/characters';
 import { Crack } from '../fx/fx';
-import { play, unlockAudio } from '../fx/sound';
+import { audioAllowed, play, unlockAudio } from '../fx/sound';
+import { playTrack, startAmbient, stopTrack } from '../fx/tracks';
 import { LiveDot } from '../hud/Live';
 import { SceneFrame, useAfter, usePrimary, useNext } from '../stage';
 import { formatBytes, formatCount, pipelineOffering } from './shared';
@@ -38,13 +39,19 @@ export function Facade() {
   const { state } = useRitual();
   const next = useNext();
   const [phase, setPhase] = useState<'calm' | 'eye' | 'crack' | 'fall'>('calm');
+  // A Cribl app is a cross-origin iframe: it usually may not play sound until it is clicked.
+  const [soundReady, setSoundReady] = useState(audioAllowed);
   const c = state.census;
+  const openEye = () => setPhase((p) => (p === 'calm' ? 'eye' : p));
 
-  // Wait for data (max ~3.5 s), then the eye opens, the page cracks and falls into darkness.
-  useAfter(state.environmentReady ? 2600 : 3800, () => setPhase((p) => (p === 'calm' ? 'eye' : p)));
+  // With sound allowed, wait for data (max ~3.5 s), then the eye opens, the page cracks and falls.
+  useAfter(soundReady ? (state.environmentReady ? 2600 : 3800) : null, openEye);
+  // Sound blocked: wait for the judge's first click (the hint says so), but never hang.
+  useAfter(soundReady ? null : 12_000, openEye);
   useEffect(() => {
     if (phase === 'eye') {
-      const t = setTimeout(() => { setPhase('crack'); play('rumble'); }, 900);
+      playTrack('facade');
+      const t = setTimeout(() => { setPhase('crack'); play('rumble'); }, 1100);
       return () => clearTimeout(t);
     }
     if (phase === 'crack') {
@@ -59,7 +66,8 @@ export function Facade() {
 
   const skip = () => {
     unlockAudio();
-    setPhase((p) => (p === 'calm' || p === 'eye' ? 'crack' : p));
+    setSoundReady(true);
+    setPhase((p) => (p === 'calm' ? 'eye' : p === 'eye' ? 'crack' : p));
   };
   usePrimary(skip, 'facade');
 
@@ -88,7 +96,11 @@ export function Facade() {
         <Text as="p" variant="body-sm-normal" color="subtle">All systems nominal.</Text>
       </div>
       {(phase === 'crack' || phase === 'fall') && <Crack />}
-      <span className="r-facade__hint">click anywhere</span>
+      {!soundReady && phase === 'calm' ? (
+        <span className="r-facade__sound-hint">🔊 This overview has sound. Click anywhere to continue.</span>
+      ) : (
+        <span className="r-facade__hint">click anywhere</span>
+      )}
     </div>
   );
 }
@@ -101,15 +113,23 @@ export function Invitation() {
   const [soul, setSoul] = useState(false);
   const judge = state.judge?.value;
 
+  useEffect(() => {
+    playTrack('intro');
+    return () => stopTrack('intro', 900);
+  }, []);
+
   const believe = () => {
     if (soul) return;
     unlockAudio();
-    play('bleat');
+    stopTrack('intro', 400);
+    playTrack('yes');
     actions.recordBelief();
     setSoul(true);
   };
   usePrimary(soul ? null : believe, `invitation:${soul}`);
-  useAfter(soul ? 1900 : null, () => next());
+  // The background track takes over after the reveal and runs to the end of the rite.
+  useAfter(soul ? 1500 : null, startAmbient);
+  useAfter(soul ? 2400 : null, () => next());
 
   return (
     <SceneFrame className="r-invitation">
@@ -123,7 +143,7 @@ export function Invitation() {
           <button className="r-btn r-btn--gold" onClick={believe}>YES</button>
           <Tooltip title="NO was sacrificed in v0.0.1.">
             <CustomTooltipTrigger>
-              <span className="r-invitation__no-gap" tabIndex={0} role="note" aria-label="NO was sacrificed in v0.0.1." />
+              <span className="r-invitation__no-gap" tabIndex={0} role="button" aria-label="NO was sacrificed in v0.0.1." />
             </CustomTooltipTrigger>
           </Tooltip>
           <button className="r-btn r-btn--gold" onClick={believe}>YES</button>

@@ -8,6 +8,7 @@ import { ScriptureDrawer } from './hud/ScriptureDrawer';
 import { SettingsDrawer } from './hud/SettingsDrawer';
 import { Particles } from './fx/Particles';
 import { setMuted, unlockAudio } from './fx/sound';
+import { preloadTracks, stopAllTracks } from './fx/tracks';
 import { Facade, Invitation, Prophecy } from './scenes/ActOne';
 import { Revelation, Sacrifice } from './scenes/ActTwo';
 import { Incident } from './scenes/ActThree';
@@ -44,6 +45,9 @@ const SCENES: SceneDef[] = [
 
 const AUTOPLAY_IDLE_MS = 4500;
 
+// Start fetching the soundtrack before the first scene mounts.
+preloadTracks();
+
 const isTyping = (t: EventTarget | null) =>
   t instanceof HTMLElement && (t.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(t.tagName));
 
@@ -63,6 +67,11 @@ function Stage() {
     unlockAudio();
     primaryRef.current?.();
   }, []);
+
+  // A restart (R, or BEGIN AGAIN) silences the soundtrack; the Façade starts it again.
+  useEffect(() => {
+    if (state.runId > 0) stopAllTracks();
+  }, [state.runId]);
 
   // The Cribl shell owns the theme; light = holy Goat, dark = demonic Goat.
   useEffect(() => installThemeBridge((theme) => actions.patch({ theme })), [actions]);

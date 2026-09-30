@@ -356,6 +356,20 @@
 .r-crack path { fill: none; stroke: #0b0a10; stroke-width: 6; stroke-linejoin: bevel; stroke-dasharray: 1; stroke-dashoffset: 1; animation: r-draw 600ms ease-out forwards; filter: drop-shadow(0 0 6px rgb(255 58 82 / 0.9)); }
 .r-crack .r-crack__branch { stroke-width: 3; animation-delay: 250ms; }
 
+.r-facade__sound-hint {
+  position: absolute;
+  left: 50%;
+  bottom: token('spacing.2xl');
+  translate: -50% 0;
+  padding: token('spacing.sm') token('spacing.lg');
+  border-radius: token('radius.full');
+  background: token('color.background.neutral.subtle');
+  border: 1px solid token('color.border.neutral.default');
+  color: token('color.foreground.default');
+  font-size: 0.95rem;
+  animation: r-throb 2.4s ease-in-out infinite;
+}
+
 .r-facade__hint { position: absolute; right: 1rem; bottom: 1rem; font-size: 0.75rem; color: token('color.foreground.subtle'); opacity: 0.6; }
 
 /* ── Rite I — Invitation ─────────────────────────────────────────────────── */

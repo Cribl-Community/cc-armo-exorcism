@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { useRitual } from '../../state/ritual';
 import { Goat, type GoatState } from '../goat/Goat';
@@ -7,6 +7,7 @@ import { CHARACTERS } from '../characters/characters';
 import { CountUp, Glitch, Sparkline, corrupt } from '../fx/fx';
 import { Particles } from '../fx/Particles';
 import { play } from '../fx/sound';
+import { duckAmbient, playTrack, stopTrack } from '../fx/tracks';
 import { LiveDot } from '../hud/Live';
 import { SceneFrame, useAfter, usePrimary, useNext } from '../stage';
 import { SACRIFICE_NAME, formatBytes, pipelineOffering } from './shared';
@@ -24,19 +25,30 @@ export function Sacrifice() {
   const peak = Math.max(...series, 1);
   const lastRate = series.length ? series[series.length - 1] / peak : 0.5;
 
+  const chosen = state.sacrifice ?? 'ceo';
   const sacrifice = () => {
     if (phase !== 'altar') return;
     play('rumble');
+    if (chosen === 'ceo') {
+      duckAmbient(true);
+      playTrack('ceo');
+    }
     setPhase('offering');
   };
   const finish = () => {
     setPhase('pleased');
-    play(starving ? 'scream' : 'choir');
+    // The CEO's offering already has its own soundtrack; don't pile a choir on top.
+    if (starving) play('scream');
+    else if (chosen !== 'ceo') play('choir');
   };
+  // Leaving the altar: the CEO's track fades out and the background comes back up.
+  useEffect(() => () => {
+    stopTrack('ceo', 2000);
+    duckAmbient(false);
+  }, []);
   usePrimary(phase === 'altar' ? sacrifice : phase === 'pleased' ? () => next() : null, `sacrifice:${phase}`);
   useAfter(phase === 'offering' && starving ? 1800 : null, finish);
 
-  const chosen = state.sacrifice ?? 'ceo';
   const ceo = CHARACTERS.ceo;
   const goatState: GoatState = phase === 'pleased' ? (starving ? 'ANGRY' : 'HOLY') : phase === 'offering' ? 'CURIOUS' : 'NORMAL';
 

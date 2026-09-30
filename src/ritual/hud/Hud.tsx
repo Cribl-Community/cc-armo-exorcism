@@ -43,7 +43,7 @@ export function TopBar() {
       <div className="r-topbar__actions">
         <Tooltip title={why}>
           <CustomTooltipTrigger>
-            <span className={`r-sigil ${live ? 'r-sigil--live' : 'r-sigil--sim'}`} tabIndex={0} role="status">{sigil}</span>
+            <span className={`r-sigil ${live ? 'r-sigil--live' : 'r-sigil--sim'}`} tabIndex={0} role="button" aria-label={`${sigil}. ${why}`}>{sigil}</span>
           </CustomTooltipTrigger>
         </Tooltip>
         <Tooltip title="Every Cribl API call the Goat made" shortcut="S">
