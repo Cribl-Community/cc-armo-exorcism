@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Spinner, EmptyState, Text, Tooltip, CustomTooltipTrigger, Button } from '@capra/core';
+import ProbePage from './probe/ProbePage';
 
 type Health = 'Green' | 'Yellow' | 'Red' | 'Unknown';
 
@@ -137,6 +138,7 @@ function App() {
   const [pastures, setPastures] = useState<GroupPasture[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [probing, setProbing] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -176,6 +178,8 @@ function App() {
 
   useEffect(() => { void load(); }, [load]);
 
+  if (probing) return <ProbePage onExit={() => setProbing(false)} />;
+
   const allSources = pastures.flatMap(p => p.sources);
   const grazingCount = allSources.filter(s => healthOf(s) === 'Green').length;
   const separatedCount = allSources.length - grazingCount;
@@ -185,9 +189,14 @@ function App() {
       <header className="pasture-header">
         <div className="pasture-header__title-row">
           <Text as="h1" variant="heading">🐐 ArMoGoat</Text>
-          <Button onClick={() => void load()} variant="secondary" disabled={loading}>
-            Refresh
-          </Button>
+          <div className="pasture-header__actions">
+            <Button onClick={() => setProbing(true)} variant="secondary">
+              Tenant probe
+            </Button>
+            <Button onClick={() => void load()} variant="secondary" disabled={loading}>
+              Refresh
+            </Button>
+          </div>
         </div>
         {!loading && !error && (
           <Text as="p" variant="body" color="subtle">

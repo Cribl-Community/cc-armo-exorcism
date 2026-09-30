@@ -1,11 +1,46 @@
 # Product API access declaration. Declare Cribl product API paths your app needs to access.
 # At install time, admins see exactly which platform resources the app will use. These grants
 # apply app-wide, to both the frontend and every backend endpoint.
+#
+# The Church of Goat only reads configuration and status, queries metrics, and runs pipeline
+# previews (the engine processes inline events; nothing is saved). It never changes Cribl config.
+# KV store access (/a/{appId}/kvstore/*) is granted automatically and is not declared here.
 
 policies:
+  # Environment census
+  - object: '/system/info'
+    actions: ['GET']
   - object: '/products/stream/groups'
     actions: ['GET']
   - object: '/products/stream/groups/*'
     actions: ['GET']
+  - object: '/m/:gid/pipelines'
+    actions: ['GET']
+  - object: '/m/:gid/routes'
+    actions: ['GET']
   - object: '/m/:gid/system/status/inputs'
+    actions: ['GET']
+  - object: '/m/:gid/system/status/outputs'
+    actions: ['GET']
+
+  # Metrics (read-only queries; POST carries the query body)
+  - object: '/system/metrics/enum'
+    actions: ['POST']
+  - object: '/system/metrics/query'
+    actions: ['POST']
+  - object: '/m/:gid/system/metrics/query'
+    actions: ['POST']
+
+  # Pipeline preview — the exorcism. Runs inline events through an inline pipeline; not persisted.
+  - object: '/preview'
+    actions: ['POST']
+  - object: '/m/:gid/preview'
+    actions: ['POST']
+
+  # Cribl Search (optional, Cribl.Cloud only) — Heresy Scrolls
+  - object: '/m/default_search/search/datasets'
+    actions: ['GET']
+  - object: '/m/default_search/search/jobs'
+    actions: ['POST']
+  - object: '/m/default_search/search/jobs/*'
     actions: ['GET']

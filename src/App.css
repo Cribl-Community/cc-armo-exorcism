@@ -38,6 +38,11 @@
   gap: token('spacing.sm');
 }
 
+.pasture-header__actions {
+  display: flex;
+  gap: token('spacing.md');
+}
+
 .pasture-header__title-row {
   display: flex;
   align-items: center;
