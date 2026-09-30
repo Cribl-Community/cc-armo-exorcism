@@ -24,6 +24,8 @@ policies:
     actions: ['GET']
 
   # Metrics (read-only queries; POST carries the query body)
+  - object: '/system/metrics'
+    actions: ['GET']
   - object: '/system/metrics/enum'
     actions: ['POST']
   - object: '/system/metrics/query'

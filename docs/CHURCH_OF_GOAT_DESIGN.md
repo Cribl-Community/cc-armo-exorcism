@@ -884,3 +884,21 @@ See **[`BUILD_PROMPT.md`](./BUILD_PROMPT.md)**. It's self-contained and can go s
 | 12+ screens run long | Judge fatigue | Auto-advancing beats, hard 4-min budget, `→` skip, autoplay mode |
 | Presenter Wi-Fi fails | Demo dies | Auto-SIMULATED with identical flow; Settings → Perform from memory |
 | Real log content on a projector (capture mode) | Data exposure | Off by default, blurred, ≤ 20 events, never persisted |
+
+---
+
+## 16. PROBE LOG (live tenant findings)
+
+### Pass 1 — 2026-09-30, Cribl.Cloud trial, Cribl 4.20.1-590ec085, group `default` (1 Worker, AWS eu-central-1)
+
+| Area | Result | Consequence |
+|---|---|---|
+| `getCriblUser()` | ✅ firstName present | Judge greeting works |
+| `/system/info` | ✅ `items[0].BUILD.VERSION`; also carries `items[0].messages[]` (real Leader system messages, some `severity: "error"`) | **New HERESY source:** Leader error messages (the trial tenant has real ones), since all 19 sources and 5 destinations were Green |
+| Census (`/m/default/pipelines`, `/routes`, status inputs/outputs) | ✅ 23 pipelines, 1 route table / 7 routes, 19 sources, 5 destinations, ~130–270 ms each | Good goatify material (`cisco_asa`, `CryptoLake`, …) |
+| `/system/metrics/enum` | ✅ `total.in_events`, `total.out_events`, `total.in_bytes`, `total.out_bytes`, `total.dropped_events` exist, with dims `__worker_group`, `__worker_node`, … | Metric names confirmed |
+| `/m/{g}/system/metrics/query` | ❌ 404 (`Cannot POST /api/v1/system/metrics/query`) | **Use the Leader `/system/metrics/query` only** |
+| `/system/metrics/query` (sum, −24h, cumulative) | ⚠ 200 but `results: []` | Body shape still wrong → pass 2 |
+| `/m/{g}/preview` and `/preview?product=stream` | ⚠ 200, `items: []`, *"Preview results may be incomplete due to process timeout"* after ~5.1 s | The `timeout: 5000` we sent was shorter than the preview process's boot time → pass 2 with 20 s. **Design impact:** start the exorcism request when the judge enters Rite 7 so the result is ready by the Rite 8 click; the staged progress bar covers the rest |
+| KV `PUT` (application/json object) | ⚠ 201, but read back as the literal `[object Object]` | The store keeps the request body as text → pass 2 tests `text/plain` + `JSON.stringify` |
+| Search datasets / job / results | ✅ 21 datasets incl. `cribl_internal_logs`; job queued → completed in ~17 s; results are NDJSON (first line = job meta) | Start the Heresy Scrolls job during the Façade so it's done by Rite 5. The job response echoes the user's email and roles: never display the raw job object |

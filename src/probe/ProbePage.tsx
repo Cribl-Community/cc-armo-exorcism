@@ -56,7 +56,7 @@ export default function ProbePage({ onExit }: { onExit: () => void }) {
         </div>
         <Text as="p" variant="body" color="subtle">
           Checks every Cribl call the Church of Goat depends on. It only reads config, runs pipeline
-          previews (nothing is saved), creates one small search job, and writes a single key in this
+          previews (nothing is saved), and writes a few test keys in this
           app's own KV store.
         </Text>
       </header>
