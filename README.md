@@ -1,90 +1,77 @@
 # 🐐 The Church of Goat
 
-The Church of Goat is an interactive Cribl telemetry purification experience.
-
-<!-- ![The Goat awakens](docs/media/hero.gif) -->
-
-▶ **Watch the ritual (3 min):** `<VIDEO_URL>` · **Under the hood (1 min):** `<VIDEO_URL_2>`
+The Church of Goat is an interactive Cribl telemetry purification experience: a 12-rite, 3½-minute ritual in which an ancient Goat possesses your Cribl, and a High Priestess tries to exorcise it.
 
 ## Summary
 
-We wanted to explore what happens when observability meets an ancient Goat deity.
+We wanted to explore what happens when observability meets an ancient Goat deity. It's funny on the surface, with real Cribl underneath:
+
+* **The exorcism is a real Cribl pipeline** (Drop → Mask → Eval → Sampling), run by your engine in **pipeline preview**. Nothing is saved, and the per-stage counts and byte reduction on screen are the engine's actual output.
+* **The Goat renames your real pipelines and destinations** (`main` → `GOAT_MAIN_RITUAL`) through the same preview. Nothing is renamed.
+* **Offerings, Goat Fuel, Heresy and Sacred Routing** come from your metrics, source/destination health and routes. 🟢 means live data and 🟡 means simulated.
+* The **📜 Scripture** drawer lists every API call the app made.
 
 ## How To Use
 
-Follow the ritual.
+Follow the ritual. There is one big button per screen. Turn the sound on, and use fullscreen if you can.
 
-## What This App Does
-
-Funny on the surface, real Cribl underneath.
-
-* The exorcism is a real Cribl pipeline (Drop, Mask, Eval, Sampling), executed by your Cribl engine in **pipeline preview** over events seeded from your own Sources. Nothing is saved.
-* The Goat possesses your real pipeline and destination names through the same engine (`main` → `GOAT_MAIN_RITUAL`). Preview only, nothing is renamed.
-* Offerings, Goat Fuel, Heresy and Sacred Routing come from your environment's metrics, status and routes.
-* Numbers marked 🟢 are live, and 🟡 means simulated. The 📜 **Scripture** drawer lists every API call the Goat made.
-
-## Before You Install
-
-Everything destructive-looking is safely simulated or isolated. The app cannot create, change or delete Cribl configuration: it only declares read, metrics, preview and search permissions, and the incident report *counts* the configuration changes it made (always 0).
-
-It works on any tenant, including an empty one. If there is no traffic, the Goat starves.
-
-Tested on Cribl `<VERSION>` (Cribl.Cloud).
+Hotkeys: `→` next · `S` Scripture · `M` mute · `R` restart · `A` autoplay.
 
 ## Installation
 
-1. Download `armogoat-<version>.tgz` from Releases (or the `release/` folder).
-2. In Cribl: **Apps → Import from file**, upload, and install.
-3. Open **The Church of Goat**. Turn the sound on. Fullscreen is recommended.
+1. Download `release/armogoat-1.0.0.tgz` from this repository.
+2. In Cribl: **Apps → Import from file**, upload the file, review the permissions and install.
+3. Open **The Church of Goat**. Users who are not admins need the app shared with them.
 
-Users who are not admins need the app shared with them.
+Tested on Cribl 4.20.1 (Cribl.Cloud). The app works on any tenant, including an empty one. Panels it can't read fall back to simulated data, and the ritual always completes. **⚙ Settings → Perform from memory** runs it fully simulated.
 
 ## Permissions
+
+The app **cannot create, change or delete Cribl configuration**. It only declares read, metrics, preview and search access (`config/policies.yml`), and its API client refuses anything outside that allowlist. The final incident report *counts* the configuration changes it made, and the count is always 0.
 
 ### Cribl API Endpoints Used
 
 | Method | Endpoint | Purpose |
 |---|---|---|
 | GET | `/api/v1/system/info` | Cribl version and Leader messages (Heresy) |
-| GET | `/api/v1/products/stream/groups` | Find the Worker Group to possess |
-| GET | `/api/v1/m/{group}/pipelines`, `/routes` | Sacred Pipelines, Sacred Routing |
-| GET | `/api/v1/m/{group}/system/status/inputs`, `/outputs` | Altars, Holy Destinations, Heresy |
-| POST | `/api/v1/system/metrics/query` | Offerings, Goat Fuel and source health (read-only query) |
-| POST | `/api/v1/m/{group}/preview` | The exorcism (preview only; nothing is saved) |
-| POST/GET | `/api/v1/m/default_search/search/jobs` | Heresy Scrolls (optional, Cribl.Cloud) |
-| GET/PUT/DELETE | `/api/v1/kvstore/church/book` | The Book of Offerings (app KV; DELETE only from Settings, after confirmation) |
-
-If a call is denied or unavailable, that panel falls back to simulated data and the ritual continues.
+| GET | `/api/v1/products/stream/groups` | Find the Worker Group |
+| GET | `/api/v1/m/{group}/pipelines` | Count and name pipelines |
+| GET | `/api/v1/m/{group}/routes` | Show routing |
+| GET | `/api/v1/m/{group}/system/status/inputs` | Source health |
+| GET | `/api/v1/m/{group}/system/status/outputs` | Destination health |
+| POST | `/api/v1/system/metrics/query` | Event and byte totals, source health metric (read-only query) |
+| POST | `/api/v1/m/{group}/preview` (or `/api/v1/preview`) | The exorcism: inline events through an inline pipeline; not persisted |
+| POST / GET | `/api/v1/m/default_search/search/jobs` (+ `/{id}/status`, `/{id}/results`) | Optional, Cribl.Cloud: five recent errors from `cribl_internal_logs` |
+| GET / PUT / DELETE | `/api/v1/kvstore/church/book` | App-scoped KV (granted automatically). DELETE only via Settings → Burn the Book, after confirmation |
 
 ## External API Access
 
-None. Fonts and sounds are bundled or synthesized in the browser.
+**None.** `config/proxies.yml` declares no domains. Fonts, images and sounds are bundled with the app. The Goat's voice in the finale uses the browser's built-in speech synthesis, which prefers on-device voices.
 
 ## Data And Storage
 
-One app-scoped KV key, `church/book`, holds anonymous ritual counters (believers, sacrifice choices, how judges faced the Goat). It stores no log content and no user data. It can be reset from **Settings → Burn the Book**.
+One app KV key, `church/book`, holds anonymous ritual counters (believers, sacrifice choices). It stores no log content and no user data.
 
 ## Support
 
 ### Community Built
 
-Built by Arno & Moise for the Cribl Hackathon. Issues: `<REPO_URL>/issues`
-
-## Known Limitations
-
-* A pipeline preview takes about 8–10 s on Cribl.Cloud. The ritual starts it early, so the wait usually happens off-screen.
-* Panels show 🟡 simulated data when the judge's role lacks access, the group has no Workers, or there is no traffic. The ritual always completes.
+Built by Arno & Moïse for the Cribl Hackathon. Issues: https://github.com/Cribl-Community/cc-armo-exorcism/issues
 
 ## Development
 
 ```bash
 npm install
 npm run dev      # live preview inside Cribl via the Apps dev connection
-npm test         # unit tests (includes a golden test against real engine output)
-npm run package  # builds the .tgz
+npm test
+npm run package  # writes build/armogoat-<version>.tgz
 ```
 
-See `docs/CHURCH_OF_GOAT_DESIGN.md` for the architecture, the real-vs-simulated map and the safety model.
+Design notes, the real-vs-simulated map and the safety model are in `docs/`. The sound clips are used under a licence obtained by the authors (sources in `docs/SOUNDTRACK.md`).
+
+## License
+
+Apache License 2.0. See [LICENSE](./LICENSE).
 
 ## App Metadata
 
@@ -93,10 +80,10 @@ See `docs/CHURCH_OF_GOAT_DESIGN.md` for the architecture, the real-vs-simulated 
 | App Name | The Church of Goat |
 | App ID | armogoat |
 | Version | 1.0.0 |
-| Author | Arno & Moise |
+| Author | Arno & Moïse |
 | Support Model | community-built |
 | Support Label | Community Built |
-| Support Contact | `<REPO_URL>/issues` |
+| Support Contact | https://github.com/Cribl-Community/cc-armo-exorcism/issues |
 | License | Apache-2.0 |
 | License File | [Apache License 2.0](./LICENSE) |
 | Product Tags | stream, search |
@@ -104,8 +91,7 @@ See `docs/CHURCH_OF_GOAT_DESIGN.md` for the architecture, the real-vs-simulated 
 | Audience | end-user |
 | Availability | preview |
 | Requires External Access | no |
-| Repository | `<REPO_URL>` |
-| Documentation | docs/CHURCH_OF_GOAT_DESIGN.md |
+| Repository | https://github.com/Cribl-Community/cc-armo-exorcism |
 | README Schema Version | 1.0 |
 
 No production systems were harmed.

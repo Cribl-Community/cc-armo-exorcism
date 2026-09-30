@@ -60,7 +60,9 @@ function speak(text: string): void {
   u.pitch = 0.1;
   u.rate = 0.85;
   u.volume = 0.9;
-  const voice = window.speechSynthesis.getVoices().find((v) => v.lang.startsWith('en'));
+  // Prefer an on-device voice so the text never leaves the machine; online voices are a last resort.
+  const english = window.speechSynthesis.getVoices().filter((v) => v.lang.startsWith('en'));
+  const voice = english.find((v) => v.localService) ?? english[0];
   if (voice) u.voice = voice;
   window.speechSynthesis.speak(u);
 }
