@@ -1,0 +1,647 @@
+/* The Church of Goat.
+   Two layers (docs §2.3): the ritual art layer uses its own palette (--r-*), a deliberate, approved
+   exception to Capra tokens, with a HOLY set (Cribl light theme) and a DEMONIC set (dark theme).
+   Every real-data surface (Façade, Incident, Reveal, drawers) uses Capra components and token(). */
+
+.ritual {
+  --r-font-display: 'Cinzel Decorative', 'Cinzel', Georgia, serif;
+  --r-font-mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+
+  /* HOLY (light) */
+  --r-void: #fbf6ec;
+  --r-stone: #efe4cf;
+  --r-ink: #1d1420;
+  --r-ink-dim: #5d5162;
+  --r-blood: #b3122e;
+  --r-ember: #d9480f;
+  --r-candle: #b27b00;
+  --r-gold: #a8740a;
+  --r-teal: #00877f;
+  --r-glow: rgb(245 197 66 / 0.55);
+  --r-panel: rgb(255 252 244 / 0.82);
+  --r-panel-border: rgb(168 116 10 / 0.45);
+
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 35%, rgb(255 255 255 / 0.9), transparent 60%),
+    radial-gradient(ellipse at 50% 110%, rgb(245 197 66 / 0.35), transparent 55%),
+    var(--r-void);
+  color: var(--r-ink);
+  font-family: var(--r-font-display);
+}
+
+.ritual[data-alignment='demonic'] {
+  --r-void: #07060b;
+  --r-stone: #16121e;
+  --r-ink: #f4ede2;
+  --r-ink-dim: #b3a9b6;
+  --r-blood: #ff3a52;
+  --r-ember: #ff6b35;
+  --r-candle: #ffc857;
+  --r-gold: #f5c542;
+  --r-teal: #19e3c9;
+  --r-glow: rgb(255 58 82 / 0.45);
+  --r-panel: rgb(22 18 30 / 0.82);
+  --r-panel-border: rgb(245 197 66 / 0.35);
+
+  background:
+    radial-gradient(ellipse at 50% 30%, rgb(120 20 40 / 0.35), transparent 60%),
+    radial-gradient(ellipse at 50% 115%, rgb(255 107 53 / 0.25), transparent 55%),
+    var(--r-void);
+}
+
+/* Façade, Incident and Reveal are real Capra pages: they sit on the product background. */
+.ritual.ritual--facade,
+.ritual.ritual--incident,
+.ritual.ritual--reveal {
+  background: token('color.background.application');
+  color: token('color.foreground.default');
+  font-family: inherit;
+}
+
+.r-stage {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 2;
+}
+
+.r-scene {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.5rem, 1.8vh, 1.75rem);
+  padding: clamp(3rem, 7vh, 4.5rem) 4vw clamp(4.25rem, 10vh, 6rem);
+  text-align: center;
+  position: relative;
+}
+
+/* ── Chamber (candles, sigil, embers) ────────────────────────────────────── */
+
+.r-chamber { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.r-particles { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.r-chamber__sigil {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: min(92vh, 92vw);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  opacity: 0.16;
+  background:
+    conic-gradient(from 0deg, transparent 0 8%, var(--r-gold) 8% 8.4%, transparent 8.4% 25%, var(--r-gold) 25% 25.4%, transparent 25.4% 42%, var(--r-gold) 42% 42.4%, transparent 42.4% 58%, var(--r-gold) 58% 58.4%, transparent 58.4% 75%, var(--r-gold) 75% 75.4%, transparent 75.4% 92%, var(--r-gold) 92% 92.4%, transparent 92.4%);
+  mask: radial-gradient(circle, transparent 0 44%, #000 44.5% 46%, transparent 46.5% 60%, #000 60.5% 61.5%, transparent 62% 69%, #000 69.5% 70%, transparent 70.5%);
+  border-radius: 50%;
+  animation: r-spin 90s linear infinite;
+}
+
+.r-chamber__candles {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: clamp(3rem, 8vh, 5rem);
+  display: flex;
+  justify-content: flex-start;
+  gap: 3vw;
+  padding: 0 3vw;
+}
+
+.r-chamber__candle:nth-child(3) { margin-right: auto; }
+
+.r-chamber__candle {
+  position: relative;
+  width: clamp(0.6rem, 1vw, 1rem);
+  height: clamp(2.5rem, 7vh, 5rem);
+  background: linear-gradient(90deg, #efe2c8, #fff7e6 45%, #d6c6a5);
+  border-radius: 0.2rem 0.2rem 0.1rem 0.1rem;
+  opacity: 0.75;
+}
+
+.r-chamber__candle:nth-child(odd) { height: clamp(3.5rem, 10vh, 7rem); }
+
+.r-chamber__candle::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 0.7em;
+  height: 1.4em;
+  translate: -50% 0;
+  background: radial-gradient(ellipse at 50% 75%, #fff6c9, var(--r-candle) 45%, transparent 70%);
+  border-radius: 50% 50% 45% 45%;
+  filter: blur(0.5px);
+  animation: r-flicker 1.4s ease-in-out infinite alternate;
+  font-size: clamp(0.8rem, 1.4vw, 1.4rem);
+}
+
+.r-chamber__candle:nth-child(3n)::before { animation-duration: 0.9s; }
+.r-chamber__vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 55%, rgb(0 0 0 / 0.55)); }
+.ritual[data-alignment='holy'] .r-chamber__vignette { background: radial-gradient(ellipse at center, transparent 60%, rgb(120 80 10 / 0.18)); }
+
+/* ── HUD ─────────────────────────────────────────────────────────────────── */
+
+.r-topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  pointer-events: none;
+}
+
+.r-topbar > * { pointer-events: auto; }
+.r-topbar__mark { font-family: var(--r-font-display); font-weight: 900; letter-spacing: 0.08em; font-size: clamp(0.8rem, 1.1vw, 1.1rem); }
+.ritual--incident .r-topbar__mark,
+.ritual--reveal .r-topbar__mark { color: token('color.foreground.default'); }
+.r-topbar__actions { display: flex; align-items: center; gap: 0.5rem; }
+
+.r-sigil {
+  font-family: var(--r-font-mono);
+  font-size: 0.8rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+
+.r-sigil--live { color: #1a9e57; }
+.r-sigil--sim { color: #c48a00; }
+
+.r-rail {
+  position: absolute;
+  padding: 0.3rem 0.9rem 0.2rem;
+  border-radius: 999px;
+  left: 50%;
+  bottom: 0.8rem;
+  translate: -50% 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  pointer-events: none;
+}
+
+.r-rail__candles { display: flex; gap: clamp(0.4rem, 1.1vw, 1rem); list-style: none; align-items: flex-end; }
+.r-rail__label { font-family: var(--r-font-display); font-weight: 700; letter-spacing: 0.18em; font-size: clamp(0.7rem, 1vw, 1rem); color: var(--r-ink-dim); }
+.ritual--incident .r-rail,
+.ritual--reveal .r-rail { background: token('color.background.panel.translucent'); box-shadow: token('shadow.medium.up'); }
+.ritual--incident .r-rail__label,
+.ritual--reveal .r-rail__label { color: token('color.foreground.subtle'); }
+
+.r-candle { position: relative; display: flex; flex-direction: column; align-items: center; }
+.r-candle__wax { width: 0.5rem; height: 1.4rem; border-radius: 0.15rem; background: #cbbd9f; opacity: 0.55; }
+.r-candle__flame { width: 0.55rem; height: 0.85rem; margin-bottom: 0.1rem; border-radius: 50% 50% 45% 45%; background: transparent; }
+.r-candle--lit .r-candle__wax { opacity: 1; background: linear-gradient(90deg, #efe2c8, #fff7e6 45%, #d6c6a5); }
+.r-candle--lit .r-candle__flame { background: radial-gradient(ellipse at 50% 75%, #fff6c9, #ffb700 50%, transparent 72%); animation: r-flicker 1.1s ease-in-out infinite alternate; }
+.r-candle--current .r-candle__flame { transform: scale(1.5); filter: drop-shadow(0 0 6px #ffb700); }
+
+.r-live {
+  display: inline-block;
+  width: 0.55em;
+  height: 0.55em;
+  margin-left: 0.3em;
+  border-radius: 50%;
+  vertical-align: middle;
+  cursor: help;
+}
+
+.r-live--real { background: #22c55e; box-shadow: 0 0 0.5em #22c55e; }
+.r-live--sim { background: #f5b301; box-shadow: 0 0 0.5em #f5b301; }
+
+/* ── Type ────────────────────────────────────────────────────────────────── */
+
+.r-title {
+  font-family: var(--r-font-display);
+  font-weight: 900;
+  font-size: clamp(1.8rem, min(5.6vw, 8.5vh), 6.2rem);
+  line-height: 1.02;
+  letter-spacing: 0.02em;
+  max-width: 18ch;
+  text-wrap: balance;
+  text-shadow: 0 0 0.35em var(--r-glow);
+}
+
+.r-title--md { font-size: clamp(1.4rem, min(4vw, 6.5vh), 4.4rem); max-width: 22ch; }
+.r-title--huge { font-size: clamp(4rem, min(14vw, 24vh), 14rem); }
+.r-title--blood { color: var(--r-blood); }
+.r-title--gold { color: var(--r-gold); }
+.r-kicker { font-family: var(--r-font-display); font-weight: 700; letter-spacing: 0.2em; font-size: clamp(1.1rem, 2.6vw, 2.6rem); color: var(--r-gold); }
+.r-whisper { font-family: var(--r-font-display); font-size: clamp(1rem, 1.9vw, 1.9rem); color: var(--r-ink-dim); letter-spacing: 0.08em; }
+.r-small { font-family: var(--r-font-mono); font-size: clamp(0.75rem, 1vw, 1rem); color: var(--r-ink-dim); }
+.r-small code, .r-json, .r-engine-status { font-family: var(--r-font-mono); }
+.r-center-stack { display: flex; flex-direction: column; align-items: center; gap: clamp(0.75rem, 2vh, 1.5rem); z-index: 3; }
+
+.r-overlay-line {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 6;
+  font-family: var(--r-font-display);
+  font-weight: 900;
+  font-size: clamp(2.2rem, 6vw, 6rem);
+  color: var(--r-gold);
+  background: rgb(0 0 0 / 0.55);
+  text-shadow: 0 0 0.4em var(--r-glow);
+}
+
+.ritual[data-alignment='holy'] .r-overlay-line { background: rgb(255 250 238 / 0.8); }
+
+.r-glitch { position: relative; }
+.r-glitch::before,
+.r-glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.r-glitch::before { color: #19e3c9; animation: r-glitch-a 1.8s infinite steps(2); mix-blend-mode: screen; }
+.r-glitch::after { color: #ff00c8; animation: r-glitch-b 1.4s infinite steps(2); mix-blend-mode: screen; }
+
+/* ── Buttons (ritual layer) ──────────────────────────────────────────────── */
+
+.r-btn {
+  position: relative;
+  font-family: var(--r-font-display);
+  font-weight: 900;
+  font-size: clamp(1rem, min(2.4vw, 4vh), 2.5rem);
+  letter-spacing: 0.08em;
+  padding: 0.5em 1.5em;
+  border-radius: 0.6em;
+  border: 2px solid transparent;
+  cursor: pointer;
+  color: #1a1206;
+  transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
+  z-index: 3;
+}
+
+.r-btn:hover { transform: translateY(-2px) scale(1.03); filter: brightness(1.08); }
+.r-btn:active { transform: translateY(1px) scale(0.99); }
+.r-btn:focus-visible { outline: 3px solid var(--r-teal); outline-offset: 4px; }
+.r-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
+
+.r-btn--gold { background: linear-gradient(180deg, #ffe08a, #e2a91d); border-color: #8a5a00; box-shadow: 0 0 1.2em rgb(245 197 66 / 0.55); }
+.r-btn--blood { background: linear-gradient(180deg, #ff5a6e, #b3122e); border-color: #5c0010; color: #fff; box-shadow: 0 0 1.4em rgb(215 38 61 / 0.6); }
+.r-btn--ghost { background: transparent; border-color: currentColor; color: var(--r-ink); }
+.r-btn--small { font-size: clamp(0.9rem, 1.5vw, 1.4rem); }
+.r-btn--huge { font-size: clamp(1.6rem, min(4.6vw, 7.5vh), 5rem); padding: 0.45em 1.4em; animation: r-pulse 1.6s ease-in-out infinite; }
+
+.r-btn--summon {
+  font-size: clamp(1.4rem, min(3.3vw, 6.5vh), 4.2rem);
+  padding: 0.55em 1.1em;
+  background: radial-gradient(ellipse at 50% 30%, #fff3c4, #f5c542 45%, #b8860b);
+  border-color: #6b4a0b;
+  box-shadow: 0 0 2.5em rgb(245 197 66 / 0.8), 0 0 5em rgb(255 107 53 / 0.45);
+  animation: r-wobble 2.4s ease-in-out infinite, r-pulse 1.3s ease-in-out infinite;
+}
+
+.r-btn__glow { position: absolute; inset: -30%; border-radius: 50%; background: radial-gradient(circle, rgb(255 230 150 / 0.55), transparent 65%); z-index: -1; animation: r-throb 1.3s ease-in-out infinite; }
+
+/* ── Rite 0 — Façade ─────────────────────────────────────────────────────── */
+
+.r-facade {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+  background: token('color.background.application');
+  overflow: hidden;
+}
+
+.r-facade__page {
+  display: flex;
+  flex-direction: column;
+  gap: token('spacing.xl');
+  padding: token('spacing.2xl') token('spacing.xl');
+  transition: transform 900ms cubic-bezier(0.6, 0, 0.9, 0.4), opacity 900ms ease, filter 900ms ease;
+}
+
+.r-facade__header { display: flex; flex-direction: column; gap: token('spacing.xs'); }
+.r-facade__grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: token('spacing.lg'); }
+.r-facade__kpi, .r-facade__eye-host { grid-column: span 3; position: relative; }
+.r-facade__value { display: inline-flex; align-items: center; }
+
+.r-facade__eye {
+  position: absolute;
+  right: 12%;
+  top: 36%;
+  width: 42%;
+  opacity: 0;
+  transform: scaleY(0);
+  transition: opacity 250ms ease, transform 500ms cubic-bezier(0.2, 1.6, 0.4, 1);
+  pointer-events: none;
+}
+
+.r-facade__eye-white { fill: #f7e7b4; stroke: #231a14; stroke-width: 3; }
+.r-facade__eye-iris { fill: #f2b705; }
+.r-facade__eye-pupil { fill: #0c0806; animation: r-look 1.4s ease-in-out infinite; }
+.r-facade--eye .r-facade__eye,
+.r-facade--crack .r-facade__eye { opacity: 1; transform: scaleY(1); }
+.r-facade--crack .r-facade__page { filter: contrast(1.2) saturate(0.6); }
+.r-facade--fall .r-facade__page { transform: translateY(30vh) rotate(-6deg) scale(0.9); opacity: 0; filter: blur(6px); }
+.r-facade--fall { background: #07060b; transition: background 700ms ease; }
+
+.r-crack { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4; }
+.r-crack path { fill: none; stroke: #0b0a10; stroke-width: 6; stroke-linejoin: bevel; stroke-dasharray: 1; stroke-dashoffset: 1; animation: r-draw 600ms ease-out forwards; filter: drop-shadow(0 0 6px rgb(255 58 82 / 0.9)); }
+.r-crack .r-crack__branch { stroke-width: 3; animation-delay: 250ms; }
+
+.r-facade__hint { position: absolute; right: 1rem; bottom: 1rem; font-size: 0.75rem; color: token('color.foreground.subtle'); opacity: 0.6; }
+
+/* ── Rite I — Invitation ─────────────────────────────────────────────────── */
+
+.r-invitation { gap: clamp(0.5rem, 1.5vh, 1.25rem); }
+.r-invitation__goat { width: clamp(10rem, 32vh, 26rem); }
+.r-invitation__copy { display: flex; flex-direction: column; align-items: center; gap: clamp(0.6rem, 1.8vh, 1.4rem); z-index: 3; }
+.r-invitation__choices { display: flex; align-items: center; gap: clamp(1rem, 3vw, 3rem); }
+.r-invitation__no-gap { display: inline-block; width: clamp(4rem, 9vw, 9rem); height: 3.5rem; border-radius: 0.6rem; border: 1px dashed transparent; cursor: help; }
+.r-invitation__no-gap:hover, .r-invitation__no-gap:focus-visible { border-color: var(--r-ink-dim); }
+
+/* ── Rite II — Prophecy ──────────────────────────────────────────────────── */
+
+.r-prophecy__cards { display: flex; gap: clamp(1rem, 3vw, 3.5rem); align-items: flex-end; justify-content: center; z-index: 3; }
+.r-card-btn { background: none; border: 0; padding: 0; cursor: pointer; border-radius: 0.8rem; transition: filter 300ms, opacity 400ms; }
+.r-card-btn:focus-visible { outline: 3px solid var(--r-teal); outline-offset: 6px; }
+.r-card-btn--chosen { filter: drop-shadow(0 0 2rem var(--r-gold)) brightness(1.15); }
+.r-card-btn--rejected { opacity: 0.2; filter: grayscale(1); }
+.r-leak { position: absolute; inset: 55% 0 0 0; overflow: hidden; font-family: var(--r-font-mono); font-size: 0.55rem; line-height: 1.1; color: #ffb3b3; opacity: 0.8; word-break: break-all; animation: r-leak 3s linear infinite; }
+
+/* ── Rite III — Sacrifice ────────────────────────────────────────────────── */
+
+.r-sacrifice__river { z-index: 2; }
+.r-sacrifice__goat { width: clamp(8rem, 24vh, 20rem); z-index: 3; }
+.r-sacrifice--altar .r-sacrifice__goat { width: clamp(5rem, 13vh, 11rem); }
+.r-sacrifice--pleased .r-sacrifice__goat { width: clamp(6rem, 17vh, 14rem); }
+.r-sacrifice--pleased .r-counter { font-size: clamp(2rem, min(5.5vw, 9vh), 6rem); }
+.r-sacrifice--pleased .r-offering__spark { display: none; }
+.r-altar { position: relative; display: flex; flex-direction: column; align-items: center; z-index: 3; }
+.r-altar__card { transform: rotate(-2deg); }
+.r-altar__card .tarot { width: clamp(6rem, min(11vw, 22vh), 12rem); }
+.r-altar__stone { width: clamp(12rem, 22vw, 22rem); height: 1.4rem; margin-top: -0.4rem; border-radius: 0.4rem; background: linear-gradient(180deg, #6d6475, #37303f); box-shadow: 0 1rem 2rem rgb(0 0 0 / 0.4); }
+.r-offering { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; z-index: 3; }
+.r-offering__burn { font-size: 4rem; height: 0; overflow: visible; }
+.r-counter { display: inline-flex; align-items: center; font-family: var(--r-font-mono); font-weight: 700; font-size: clamp(2.4rem, min(8vw, 13vh), 9rem); line-height: 1; color: var(--r-gold); text-shadow: 0 0 0.3em var(--r-glow); font-variant-numeric: tabular-nums; }
+.r-counter__label { font-family: var(--r-font-display); font-weight: 700; letter-spacing: 0.15em; font-size: clamp(0.9rem, min(2vw, 3.2vh), 2rem); }
+.r-counter .r-live { width: 0.9rem; height: 0.9rem; margin-left: 0.6rem; }
+.r-counter__sub { font-family: var(--r-font-mono); font-size: clamp(0.9rem, min(2vw, 3.2vh), 2rem); color: var(--r-teal); }
+.r-offering__spark { width: min(60vw, 46rem); display: flex; flex-direction: column; align-items: center; gap: 0.2rem; }
+.r-sparkline { width: 100%; height: clamp(2.5rem, 7vh, 5rem); overflow: visible; }
+.r-sparkline path { fill: none; stroke: var(--r-teal); stroke-width: 1.2; vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: 1; animation: r-draw 2.2s ease-out forwards; filter: drop-shadow(0 0 4px var(--r-teal)); }
+
+/* ── Rite IV — Revelation ────────────────────────────────────────────────── */
+
+.r-revelation--0, .r-revelation--1 { background: #000; color: #f4ede2; }
+.ritual[data-alignment='holy'] .r-revelation--0,
+.ritual[data-alignment='holy'] .r-revelation--1 { background: #fff; color: #1d1420; }
+.r-corruption { display: flex; flex-direction: column; gap: 0.45rem; width: min(92vw, 70rem); z-index: 3; }
+.r-corruption__panel { display: flex; flex-direction: column; gap: 0.1rem; padding: 0.45rem 1rem; text-align: left; border-radius: 0.5rem; background: var(--r-panel); border: 1px solid var(--r-panel-border); }
+.r-corruption__panel code { font-family: var(--r-font-mono); font-size: clamp(0.65rem, min(1.1vw, 1.9vh), 1.05rem); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.r-corruption__label { font-family: var(--r-font-display); font-weight: 700; letter-spacing: 0.12em; font-size: clamp(0.8rem, 1.2vw, 1.2rem); }
+.r-corruption__panel--corrupted { animation: r-flicker-panel 0.3s steps(2) infinite; }
+.r-corruption__panel--corrupted code { color: #b57bff; }
+.r-corruption__panel--demonic { border-color: var(--r-blood); box-shadow: 0 0 1.5rem rgb(255 58 82 / 0.4); }
+.r-corruption__panel--demonic code { color: var(--r-blood); }
+
+/* ── Rite V — Incident (Capra surfaces) ──────────────────────────────────── */
+
+.r-incident { justify-content: flex-start; align-items: stretch; gap: token('spacing.lg'); padding: 3.5rem token('spacing.lg') 5.5rem; text-align: left; font-family: inherit; }
+.r-siren {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: token('spacing.lg');
+  padding: token('spacing.md') token('spacing.lg');
+  border-radius: token('radius.md');
+  background: token('color.background.danger.solid.default');
+  color: token('color.foreground.danger.contrast');
+  font-weight: 700;
+  font-size: clamp(1rem, 2vw, 1.8rem);
+  letter-spacing: 0.04em;
+  animation: r-siren 1s ease-in-out infinite;
+}
+.r-siren__id { font-family: var(--r-font-mono); font-size: 0.7em; }
+.r-incident__grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: token('spacing.lg'); }
+.r-incident__kpi { grid-column: span 3; }
+.r-incident__value { display: inline-flex; align-items: center; }
+.r-incident__heresy { grid-column: span 4; }
+.r-incident__routing { grid-column: span 8; }
+.r-incident__sources { grid-column: span 7; }
+.r-incident__scrolls { grid-column: span 5; }
+.r-incident__action { display: flex; justify-content: center; }
+.r-incident__sigils { display: inline-flex; gap: token('spacing.xs'); }
+.r-heresy-list, .r-scroll-list { list-style: none; display: flex; flex-direction: column; gap: token('spacing.sm'); }
+.r-heresy-list li { display: flex; align-items: center; gap: token('spacing.sm'); }
+.r-scroll-list li { font-size: 0.85rem; color: token('color.foreground.default'); }
+.r-scroll-list code { color: token('color.foreground.subtle'); margin-right: token('spacing.xs'); }
+.r-routing { width: 100%; height: auto; max-height: 260px; }
+.r-routing__edge { fill: none; stroke: token('color.border.accent.default'); stroke-width: 2; opacity: 0.7; stroke-dasharray: 5 5; animation: r-flow 1.2s linear infinite; }
+.r-routing__node rect { fill: token('color.background.neutral.subtle'); stroke: token('color.border.neutral.default'); }
+.r-routing__node--accent rect { fill: token('color.background.accent.subtle'); stroke: token('color.border.accent.default'); }
+.r-routing__label { font-family: var(--r-font-mono); font-size: 12px; fill: token('color.foreground.default'); }
+.r-routing__caption { font-size: 9px; font-style: italic; fill: token('color.foreground.subtle'); }
+.r-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.r-table th, .r-table td { text-align: left; padding: token('spacing.xs') token('spacing.sm'); border-bottom: 1px solid token('color.border.neutral.subtle'); }
+.r-table th { color: token('color.foreground.subtle'); font-weight: 600; }
+.r-incident .r-btn--blood { font-size: clamp(1.1rem, 2.2vw, 2.2rem); }
+
+/* ── Rite VI — Builders ──────────────────────────────────────────────────── */
+
+.r-builders__cast { display: flex; gap: clamp(3rem, 12vw, 14rem); align-items: flex-start; justify-content: center; z-index: 3; }
+.r-builders__slot { position: relative; }
+.r-bubble {
+  position: absolute;
+  top: -1.2rem;
+  width: max-content;
+  max-width: 18rem;
+  padding: 0.7em 1em;
+  border-radius: 1rem;
+  background: #fffdf6;
+  color: #1d1420;
+  font-family: var(--r-font-display);
+  font-weight: 700;
+  font-size: clamp(1rem, 1.9vw, 1.9rem);
+  box-shadow: 0 0.6rem 1.8rem rgb(0 0 0 / 0.35);
+  z-index: 4;
+}
+.r-bubble--left { left: 70%; }
+.r-bubble--right { right: 70%; }
+
+/* ── Rite VII — Priestess ────────────────────────────────────────────────── */
+
+.r-rays {
+  position: absolute;
+  left: 50%;
+  top: -20%;
+  width: 160vmax;
+  aspect-ratio: 1;
+  translate: -50% 0;
+  background: repeating-conic-gradient(from 0deg at 50% 50%, rgb(255 255 255 / 0.12) 0 4deg, transparent 4deg 14deg);
+  mask: radial-gradient(circle, #000 0 10%, transparent 55%);
+  animation: r-spin 60s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+.r-rays--gold { background: repeating-conic-gradient(from 0deg at 50% 50%, rgb(245 197 66 / 0.25) 0 5deg, transparent 5deg 15deg); }
+.r-priestess .tarot { width: clamp(6.5rem, min(14vw, 24vh), 15rem); }
+
+.r-rite { display: flex; align-items: stretch; justify-content: center; gap: clamp(0.4rem, 1vw, 1rem); list-style: none; z-index: 3; flex-wrap: wrap; }
+.r-rite__node, .r-rite__end {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  min-width: clamp(6rem, 11vw, 11rem);
+  padding: 0.7rem 0.6rem;
+  border-radius: 0.7rem;
+  background: var(--r-panel);
+  border: 2px solid var(--r-panel-border);
+  transition: border-color 300ms, box-shadow 300ms, transform 300ms;
+}
+.r-rite__node + .r-rite__node::before,
+.r-rite__end + .r-rite__node::before,
+.r-rite__node + .r-rite__end::before { content: '→'; position: absolute; left: -0.9em; top: 50%; translate: -50% -50%; font-size: 1.2rem; color: var(--r-ink-dim); }
+.r-rite__glyph { font-size: clamp(1.4rem, 2.6vw, 2.6rem); }
+.r-rite__end { font-size: clamp(1.4rem, 2.6vw, 2.6rem); }
+.r-rite__end span, .r-rite__label { font-family: var(--r-font-display); font-weight: 700; font-size: clamp(0.7rem, 1.1vw, 1.1rem); letter-spacing: 0.06em; }
+.r-rite__func { font-family: var(--r-font-mono); font-size: clamp(0.65rem, 0.9vw, 0.9rem); color: var(--r-teal); }
+.r-rite__count { font-family: var(--r-font-mono); font-size: clamp(0.65rem, 0.95vw, 0.95rem); color: var(--r-gold); }
+.r-rite__node--lit, .r-rite__end--lit { border-color: var(--r-gold); box-shadow: 0 0 1.4rem var(--r-glow); transform: translateY(-4px); }
+.r-rite__end--demon { border-color: var(--r-blood); }
+.r-engine-status { font-size: clamp(0.8rem, 1.2vw, 1.2rem); color: var(--r-teal); z-index: 3; }
+
+/* ── Rite VIII — Exorcism ────────────────────────────────────────────────── */
+
+.r-exorcism__goat { width: clamp(8rem, 22vh, 17rem); z-index: 3; }
+.r-exorcism--resisted .r-exorcism__goat { width: clamp(7rem, 16vh, 12rem); }
+.r-progress { position: relative; width: min(80vw, 56rem); height: clamp(2.4rem, 5vh, 3.6rem); border-radius: 0.8rem; background: var(--r-panel); border: 2px solid var(--r-panel-border); overflow: hidden; z-index: 3; }
+.r-progress__bar { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, var(--r-teal), var(--r-gold)); transition: width 700ms cubic-bezier(0.3, 0.8, 0.3, 1); box-shadow: 0 0 1.4rem var(--r-glow); }
+.r-progress__label { position: relative; display: grid; place-items: center; height: 100%; font-family: var(--r-font-mono); font-weight: 700; font-size: clamp(0.9rem, 1.7vw, 1.7rem); mix-blend-mode: difference; color: #fff; }
+.r-resisted { display: flex; flex-direction: column; align-items: center; gap: clamp(0.5rem, 1.5vh, 1.1rem); z-index: 3; animation: r-shake 0.5s ease-in-out 2; }
+.r-error { display: flex; flex-direction: column; align-items: center; padding: 0.6rem 2.5rem; border: 3px solid var(--r-blood); border-radius: 0.8rem; background: rgb(179 18 46 / 0.15); box-shadow: 0 0 2.5rem rgb(255 58 82 / 0.45); }
+.r-error__code { font-family: var(--r-font-mono); font-weight: 700; font-size: clamp(1rem, 1.8vw, 1.8rem); color: var(--r-blood); letter-spacing: 0.4em; }
+.r-error__text { font-family: var(--r-font-display); font-weight: 900; font-size: clamp(2rem, 5vw, 5.5rem); color: var(--r-blood); }
+.r-heresy-removed { font-family: var(--r-font-mono); font-weight: 700; font-size: clamp(1rem, 2vw, 2rem); color: var(--r-gold); }
+.r-resisted__goats { list-style: none; display: flex; flex-direction: column; gap: 0.25rem; align-items: center; }
+.r-resisted__goats code { font-family: var(--r-font-mono); font-size: clamp(0.7rem, min(1.1vw, 1.9vh), 1.05rem); }
+.r-resisted__goats .r-resisted__field { color: var(--r-blood); font-weight: 700; }
+.r-json { text-align: left; font-size: clamp(0.65rem, 0.9vw, 0.9rem); padding: 0.5rem 0.8rem; border-radius: 0.5rem; background: var(--r-panel); border: 1px solid var(--r-blood); color: var(--r-ink); max-width: 26rem; white-space: pre-wrap; word-break: break-word; }
+
+/* ── Rite IX — Possession ────────────────────────────────────────────────── */
+
+.r-possession__invert { position: absolute; inset: 0; background: #fff; mix-blend-mode: difference; animation: r-invert 1.2s ease-out forwards; pointer-events: none; z-index: 4; }
+.r-possession { background: radial-gradient(ellipse at 50% 35%, rgb(215 38 61 / 0.45), transparent 65%); }
+.r-possession__goat { width: clamp(7rem, 21vh, 18rem); z-index: 3; }
+.r-possession__prophecy { min-height: 1.1em; z-index: 3; font-size: clamp(1.4rem, min(4.2vw, 7vh), 4.6rem); max-width: 24ch; }
+.r-caret { animation: r-blink 0.8s steps(1) infinite; }
+.r-board { display: flex; flex-direction: column; gap: 0.35rem; padding: 0.7rem 1.2rem; border-radius: 0.8rem; background: #0b0a10; border: 2px solid var(--r-blood); color: #f4ede2; z-index: 3; box-shadow: 0 0 2rem rgb(255 58 82 / 0.4); }
+.r-board__head { display: flex; justify-content: space-between; align-items: center; font-family: var(--r-font-display); font-weight: 700; letter-spacing: 0.14em; color: #ffc857; }
+.r-board__rows { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
+.r-board__row { display: grid; grid-template-columns: 8rem 1fr; align-items: center; gap: 0.8rem; text-align: left; }
+.r-board__kind { font-family: var(--r-font-mono); font-size: 0.8rem; color: #b3a9b6; text-transform: uppercase; }
+.r-flap { position: relative; display: inline-grid; font-family: var(--r-font-mono); font-weight: 700; font-size: clamp(0.85rem, 1.5vw, 1.5rem); perspective: 400px; }
+.r-flap__from, .r-flap__to { grid-area: 1 / 1; padding: 0.15em 0.5em; border-radius: 0.3em; background: #1c1824; backface-visibility: hidden; transition: transform 500ms ease; }
+.r-flap__to { transform: rotateX(-180deg); color: #ff3a52; }
+.r-flap--flipped .r-flap__from { transform: rotateX(180deg); }
+.r-flap--flipped .r-flap__to { transform: rotateX(0); }
+.r-stamp { align-self: center; margin-top: 0.3rem; padding: 0.3rem 0.9rem; border: 3px double #19e3c9; color: #19e3c9; font-family: var(--r-font-mono); font-weight: 700; letter-spacing: 0.1em; transform: rotate(-3deg); }
+.r-board .r-btn--ghost { color: #f4ede2; font-size: clamp(0.9rem, 1.6vw, 1.5rem); align-self: center; }
+
+/* ── Rite X — Final button ───────────────────────────────────────────────── */
+
+.r-final__goat { width: clamp(8rem, 24vh, 18rem); z-index: 3; }
+.r-final__choices { display: flex; align-items: center; justify-content: center; gap: clamp(0.8rem, 2.5vw, 2.5rem); flex-wrap: nowrap; z-index: 3; }
+.r-final__choices .r-btn { white-space: nowrap; }
+
+/* ── Rite XI — Awakening ─────────────────────────────────────────────────── */
+
+.r-awakening__goat-wrap { z-index: 3; }
+.r-awakening__goat { width: clamp(12rem, 42vh, 30rem); }
+
+/* ── Rite XII — Report ───────────────────────────────────────────────────── */
+
+.r-report { justify-content: flex-start; }
+.r-parchment {
+  position: relative;
+  width: min(92vw, 52rem);
+  padding: clamp(1rem, 3vh, 2rem) clamp(1.2rem, 3vw, 2.6rem);
+  background: radial-gradient(ellipse at 30% 20%, #fff9e8, #f1dfb6 70%, #e2c88e);
+  color: #2a1a05;
+  border-radius: 0.4rem;
+  box-shadow: 0 1.5rem 3rem rgb(0 0 0 / 0.45), inset 0 0 3rem rgb(120 80 10 / 0.25);
+  text-align: left;
+  z-index: 3;
+}
+.r-parchment__head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; border-bottom: 2px solid #8a5a00; padding-bottom: 0.4rem; margin-bottom: 0.4rem; }
+.r-parchment__head h1 { font-family: var(--r-font-display); font-weight: 900; font-size: clamp(1.3rem, 2.8vw, 2.6rem); }
+.r-parchment__ticket { font-family: var(--r-font-mono); font-size: 0.85rem; }
+.r-report__table { width: 100%; border-collapse: collapse; display: block; font-family: var(--r-font-mono); font-size: clamp(0.72rem, 1.05vw, 1.02rem); }
+.r-report__table tbody { display: grid; grid-template-columns: 1fr 1fr; column-gap: clamp(1rem, 3vw, 2.5rem); }
+.r-report__table tr { display: flex; justify-content: space-between; gap: 0.6rem; border-bottom: 1px dotted rgb(90 69 32 / 0.35); }
+.r-report__table th { text-align: left; font-weight: 400; padding: 0.12rem 0; color: #5a4520; }
+.r-report__table td { text-align: right; font-weight: 700; padding: 0.12rem 0; }
+.r-report__strong th, .r-report__strong td { color: #8a0d20; font-size: 1.12em; }
+.r-parchment__status { margin-top: 0.6rem; font-family: var(--r-font-display); font-weight: 900; font-size: clamp(1.2rem, 2.4vw, 2.2rem); }
+.r-parchment__footer { font-family: var(--r-font-display); font-weight: 700; letter-spacing: 0.1em; font-size: clamp(0.8rem, 1.3vw, 1.2rem); color: #8a0d20; }
+.r-seal { position: absolute; right: 1.5rem; bottom: 1.2rem; display: grid; place-items: center; width: clamp(3.5rem, 7vw, 6rem); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #e0414f, #8a0d20 70%); box-shadow: 0 0.3rem 0.8rem rgb(0 0 0 / 0.4); font-size: clamp(1.6rem, 3vw, 2.8rem); transform: rotate(-12deg); }
+.r-report__actions { display: flex; gap: 1rem; z-index: 3; }
+.r-report__actions .r-btn { font-size: clamp(0.9rem, 1.6vw, 1.5rem); }
+
+/* ── Reveal (Capra) ──────────────────────────────────────────────────────── */
+
+.r-reveal { font-family: inherit; text-align: left; }
+.r-reveal__card { width: min(92vw, 56rem); }
+.r-reveal__facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: token('spacing.lg'); margin-bottom: token('spacing.lg'); }
+.r-reveal__fact { display: flex; flex-direction: column; gap: token('spacing.xs'); }
+.r-reveal__endpoints { list-style: none; display: flex; flex-direction: column; gap: token('spacing.xs'); margin: token('spacing.sm') 0 token('spacing.lg'); }
+.r-reveal__functions { font-family: var(--r-font-mono); font-size: 0.95rem; }
+.r-reveal__endpoints code { font-family: var(--r-font-mono); font-size: 0.85rem; color: token('color.foreground.success.default'); }
+
+/* ── Drawers (Capra) ─────────────────────────────────────────────────────── */
+
+.r-scripture { display: flex; flex-direction: column; gap: token('spacing.md'); }
+.r-scripture__list { list-style: none; display: flex; flex-direction: column; gap: token('spacing.sm'); }
+.r-scripture__entry { display: flex; flex-direction: column; gap: token('spacing.xs'); padding: token('spacing.sm'); border: 1px solid token('color.border.neutral.subtle'); border-radius: token('radius.md'); }
+.r-scripture__row { display: flex; align-items: center; gap: token('spacing.sm'); }
+.r-scripture__call { font-family: var(--r-font-mono); font-size: 0.78rem; color: token('color.foreground.subtle'); word-break: break-all; }
+.r-scripture__details summary { cursor: pointer; font-size: 0.8rem; color: token('color.foreground.link'); }
+.r-scripture__details pre { margin-top: token('spacing.xs'); padding: token('spacing.sm'); max-height: 16rem; overflow: auto; font-family: var(--r-font-mono); font-size: 0.72rem; white-space: pre-wrap; word-break: break-all; background: token('color.background.neutral.subtle'); border-radius: token('radius.md'); }
+.r-settings { display: flex; flex-direction: column; gap: token('spacing.xl'); }
+.r-settings__section { display: flex; flex-direction: column; gap: token('spacing.sm'); }
+.r-settings__row { display: flex; align-items: flex-start; gap: token('spacing.md'); cursor: pointer; }
+.r-settings__row > span { display: flex; flex-direction: column; gap: token('spacing.xs'); }
+.r-settings__select { padding: token('spacing.sm'); border-radius: token('radius.md'); border: 1px solid token('color.border.neutral.default'); background: token('color.background.surface'); color: token('color.foreground.default'); }
+
+/* ── Keyframes ───────────────────────────────────────────────────────────── */
+
+@keyframes r-spin { to { rotate: 360deg; } }
+@keyframes r-flicker { 0% { transform: scale(1) translateY(0); opacity: 0.9; } 100% { transform: scale(1.12, 0.92) translateY(-1px); opacity: 1; } }
+@keyframes r-pulse { 0%, 100% { box-shadow: 0 0 1.2em var(--r-glow); } 50% { box-shadow: 0 0 2.8em var(--r-glow), 0 0 0.4em #fff; } }
+@keyframes r-wobble { 0%, 100% { rotate: -1.5deg; } 50% { rotate: 1.5deg; } }
+@keyframes r-throb { 0%, 100% { opacity: 0.6; scale: 1; } 50% { opacity: 1; scale: 1.08; } }
+@keyframes r-draw { to { stroke-dashoffset: 0; } }
+@keyframes r-look { 0%, 100% { transform: translateX(-6px); } 50% { transform: translateX(6px); } }
+@keyframes r-leak { from { transform: translateY(0); } to { transform: translateY(40%); } }
+@keyframes r-glitch-a { 0% { clip-path: inset(10% 0 60% 0); translate: -4px 0; } 50% { clip-path: inset(55% 0 12% 0); translate: 4px 0; } 100% { clip-path: inset(30% 0 40% 0); translate: -2px 0; } }
+@keyframes r-glitch-b { 0% { clip-path: inset(60% 0 8% 0); translate: 4px 0; } 50% { clip-path: inset(8% 0 70% 0); translate: -4px 0; } 100% { clip-path: inset(40% 0 30% 0); translate: 2px 0; } }
+@keyframes r-flicker-panel { 0% { opacity: 1; transform: translateX(0); } 100% { opacity: 0.85; transform: translateX(2px); } }
+@keyframes r-siren { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.25); } }
+@keyframes r-flow { to { stroke-dashoffset: -20; } }
+@keyframes r-shake { 0%, 100% { translate: 0; } 20% { translate: -12px 4px; } 40% { translate: 10px -6px; } 60% { translate: -8px 2px; } 80% { translate: 6px -2px; } }
+@keyframes r-invert { 0% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes r-blink { 50% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .ritual *, .ritual *::before, .ritual *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+}

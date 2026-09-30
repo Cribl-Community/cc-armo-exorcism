@@ -931,3 +931,21 @@ See **[`BUILD_PROMPT.md`](./BUILD_PROMPT.md)**. It's self-contained and can go s
 - **KV:** `text/plain` body = `JSON.stringify(doc)`; `GET` returns the same text; a 404 means empty.
 - **Search:** start the job during the Façade (it takes ~17 s); results are NDJSON with the job meta on line 1. Never display the raw job object (it echoes the user's email and roles).
 - **Leftover probe keys** in this tenant's app KV: `church/probe`, `church/probe-text`. They're harmless and get removed with the probe.
+
+---
+
+## 17. IMPLEMENTATION NOTES (v1.0.0, 2026-09-30)
+
+What was built, and where it deviates from §2–§11 and `BUILD_PROMPT.md`:
+
+- **Layout:** `src/cribl/` (client with allowlist + Scripture, census, metrics, rite, kv, search, fixtures), `src/state/ritual.tsx` (reducer + orchestration), `src/ritual/` (stage, HUD, Goat, tarot characters, fx, and scenes grouped by act in `scenes/ActOne…ActSix.tsx`). Copy lives in the scenes rather than a separate `story.ts`.
+- **One combined preview call** (exorcism + goatification) fires when the judge clicks SUMMON THE BUILDERS. It waits for the census (max 10 s) so it always uses the tenant's real names.
+- **Byte reduction:** demon events carry an `ectoplasm` junk field that ANOINT removes, so "Heresy removed" is a meaningful number (~60 %). It's still computed from engine input vs output.
+- **Scene advancing is scene-aware** (`advanceFrom(index)`): a timer in an exiting scene can never skip the next one.
+- **Sound is synthesized with WebAudio** (bleat, scream, choir, lullaby, rumble…). No audio assets.
+- **Theme:** the Goat's alignment follows the same `.dark` class the Capra tokens use, set by the `CRIBL_APP_LAYOUT` bridge. Light = holy, dark = demonic.
+- **Removed:** the scaffold's sample backend endpoint and schedules (frontend-only app). The hourly heartbeat stretch goal would bring a backend back.
+- **Not built yet (stretch):** sandbox pipeline creation, opt-in live capture, report-as-event, heartbeat schedule.
+- **Dev aids:** `?demo` forces simulated mode; `?scene=N` (dev builds only) jumps to a scene.
+- **Tests:** `npm test`, including a golden test of the stage-count derivation against real engine output from probe pass 2, emulator parity, and the allowlist.
+- **Packaging on OneDrive:** `npm run package` fails or produces an empty archive when the project sits in a OneDrive-synced folder. The CLI rebuilds `dist/` and tar then reads files OneDrive is still syncing. Either keep the repo outside OneDrive, or run `npm run build`, wait for sync, and pack with the `@cribl/apps` packer directly (`createAppPack`).

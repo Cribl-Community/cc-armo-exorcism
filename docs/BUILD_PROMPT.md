@@ -1,5 +1,7 @@
 # BUILD PROMPT — 🐐 The Church of Goat (Cribl App)
 
+> **Status (2026-09-30):** implemented as v1.0.0. See `docs/CHURCH_OF_GOAT_DESIGN.md` §17 for what was built and the deviations from this prompt.
+
 You are implementing **The Church of Goat**, a Cribl App for the Cribl App Platform, in the existing repo `armogoat/`. It's a hackathon entry for "most weird application": a ~3.5-minute linear, interactive, absurd occult story that is **powered by real Cribl APIs and the real Cribl pipeline engine underneath**.
 
 ## 0. Read first (mandatory, in this order)

@@ -1,0 +1,128 @@
+/* The Goat. Part of the ritual art layer (a deliberate exception to Capra tokens — see docs §2.3).
+   Colors come from the ritual palette so the Goat is holy in Cribl's light theme and demonic in dark. */
+
+.goat {
+  position: relative;
+  aspect-ratio: 1;
+  --goat-fur-top: #f4ede0;
+  --goat-fur-bottom: #d6c8b0;
+  --goat-horn-base: #7d6a4c;
+  --goat-horn-tip: #d9c7a1;
+  --goat-eye: #f2b705;
+  --goat-ink: #231a14;
+  --goat-aura: transparent;
+  --goat-glow: var(--r-candle);
+}
+
+.goat__svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.goat__svg * {
+  transform-box: view-box;
+}
+
+.goat__aura-core { stop-color: var(--goat-aura); stop-opacity: 0.85; }
+.goat__aura-edge { stop-color: var(--goat-aura); stop-opacity: 0; }
+.goat__fur-top { stop-color: var(--goat-fur-top); }
+.goat__fur-bottom { stop-color: var(--goat-fur-bottom); }
+.goat__horn-base { stop-color: var(--goat-horn-base); }
+.goat__horn-tip { stop-color: var(--goat-horn-tip); }
+
+.goat__aura { transition: opacity 600ms ease; }
+.goat__horn { stroke: var(--goat-ink); stroke-width: 3; stroke-linejoin: round; }
+.goat__ridges path { fill: none; stroke: var(--goat-ink); stroke-opacity: 0.35; stroke-width: 3; stroke-linecap: round; }
+.goat__ear { stroke: var(--goat-ink); stroke-width: 3; }
+.goat__ear-inner { fill: #e7a9a0; opacity: 0.8; }
+.goat__face { stroke: var(--goat-ink); stroke-width: 3.5; }
+.goat__tuft { fill: var(--goat-fur-bottom); }
+.goat__blaze { fill: #ffffff; opacity: 0.35; }
+.goat__muzzle { fill: #f9f3ea; stroke: var(--goat-ink); stroke-width: 2.5; }
+.goat__nostril { fill: var(--goat-ink); }
+.goat__mouth { fill: none; stroke: var(--goat-ink); stroke-width: 3; stroke-linecap: round; }
+.goat__mouth-open { fill: #4a1016; opacity: 0; transition: opacity 200ms; }
+.goat__beard { fill: var(--goat-fur-bottom); stroke: var(--goat-ink); stroke-width: 2.5; }
+.goat__iris { fill: var(--goat-eye); stroke: var(--goat-ink); stroke-width: 2.5; transition: fill 400ms; }
+.goat__pupil { fill: #0c0806; transition: x 120ms linear, y 120ms linear; }
+.goat__glint { fill: #fff; opacity: 0.8; }
+.goat__lid { transform: scaleY(0); animation: goat-blink 5.5s infinite; }
+.goat__brows path { stroke: var(--goat-ink); stroke-width: 7; stroke-linecap: round; }
+
+.goat__halo { fill: none; stroke: #f5c542; stroke-width: 9; opacity: 0; transition: opacity 500ms; }
+.goat__crown { fill: #f5c542; stroke: #8a5a00; stroke-width: 3; opacity: 0; transition: opacity 500ms; }
+.goat__flames path { fill: #ff6b35; opacity: 0; transform-origin: center bottom; }
+.goat__rings ellipse { fill: none; stroke: var(--r-teal); stroke-width: 2; stroke-dasharray: 6 10; opacity: 0; }
+.goat__sparkles path { fill: #f5c542; opacity: 0; }
+.goat__brows, .goat__extra-eyes { opacity: 0; transition: opacity 400ms; }
+.goat__mouth { animation: goat-chew 2.8s ease-in-out infinite; transform-origin: 256px 392px; }
+
+.goat__question {
+  position: absolute;
+  top: 2%;
+  right: 8%;
+  font-family: var(--r-font-display);
+  font-size: clamp(2rem, 7vw, 6rem);
+  color: var(--r-candle);
+  opacity: 0;
+  transform: rotate(12deg);
+  transition: opacity 300ms;
+  pointer-events: none;
+}
+
+/* ── States ─────────────────────────────────────────────────────────────── */
+
+.goat[data-state='CURIOUS'] .goat__question { opacity: 1; animation: goat-bob 1.6s ease-in-out infinite; }
+
+.goat[data-state='ANGRY'] { --goat-aura: #d7263d; --goat-eye: #ff8a3d; }
+.goat[data-state='ANGRY'] .goat__aura { opacity: 0.45; }
+.goat[data-state='ANGRY'] .goat__brows { opacity: 1; }
+.goat[data-state='ANGRY'] .goat__head { animation: goat-shake 0.5s ease-in-out 3; }
+
+.goat[data-state='POSSESSED'] { --goat-aura: #d7263d; --goat-eye: #ff2d3d; --goat-fur-top: #d9cfc0; --goat-fur-bottom: #a3927a; }
+.goat[data-state='POSSESSED'] .goat__aura { opacity: 0.9; animation: goat-throb 1.2s ease-in-out infinite; }
+.goat[data-state='POSSESSED'] .goat__brows { opacity: 1; }
+.goat[data-state='POSSESSED'] .goat__iris { filter: drop-shadow(0 0 6px #ff2d3d); }
+.goat[data-state='POSSESSED'] .goat__pupil { fill: #2b0000; }
+.goat[data-state='POSSESSED'] .goat__flames path { opacity: 1; animation: goat-flame 0.35s ease-in-out infinite alternate; }
+.goat[data-state='POSSESSED'] .goat__head { animation: goat-jitter 0.12s steps(2) infinite; }
+
+.goat[data-state='HOLY'] { --goat-aura: #f5c542; --goat-horn-base: #b8860b; --goat-horn-tip: #fff3c4; }
+.goat[data-state='HOLY'] .goat__aura { opacity: 0.8; }
+.goat[data-state='HOLY'] .goat__halo { opacity: 1; animation: goat-bob 3s ease-in-out infinite; }
+.goat[data-state='HOLY'] .goat__lid { transform: scaleY(1); animation: none; }
+.goat[data-state='HOLY'] .goat__sparkles path { opacity: 1; animation: goat-twinkle 1.8s ease-in-out infinite; }
+.goat[data-state='HOLY'] .goat__mouth { animation: none; }
+
+.goat[data-state='SUPREME'] { --goat-aura: #d7263d; --goat-eye: #ffd23f; --goat-horn-base: #3b0a0a; --goat-horn-tip: #ff6b35; }
+.goat[data-state='SUPREME'] .goat__svg { transform: scale(1.06); }
+.goat[data-state='SUPREME'] .goat__aura { opacity: 1; animation: goat-throb 2s ease-in-out infinite; }
+.goat[data-state='SUPREME'] .goat__crown,
+.goat[data-state='SUPREME'] .goat__extra-eyes { opacity: 1; }
+.goat[data-state='SUPREME'] .goat__iris { filter: drop-shadow(0 0 6px #ffd23f); }
+.goat[data-state='SUPREME'] .goat__flames path { opacity: 1; animation: goat-flame 0.3s ease-in-out infinite alternate; }
+.goat[data-state='SUPREME'] .goat__rings ellipse { opacity: 0.8; animation: goat-spin 9s linear infinite; transform-origin: 256px 280px; }
+.goat[data-state='SUPREME'] .goat__rings ellipse + ellipse { animation-direction: reverse; animation-duration: 6s; }
+.goat[data-state='SUPREME'] .goat__mouth-open { opacity: 1; }
+.goat[data-state='SUPREME'] .goat__mouth { opacity: 0; }
+.goat[data-state='SUPREME'] .goat__eye--x1 .goat__lid { animation-delay: 0.7s; animation-duration: 3.1s; }
+.goat[data-state='SUPREME'] .goat__eye--x2 .goat__lid { animation-delay: 1.3s; animation-duration: 2.3s; }
+.goat[data-state='SUPREME'] .goat__eye--x3 .goat__lid { animation-delay: 0.2s; animation-duration: 2.9s; }
+.goat[data-state='SUPREME'] .goat__eye--x4 .goat__lid { animation-delay: 1.9s; animation-duration: 1.7s; }
+
+/* ── Keyframes ──────────────────────────────────────────────────────────── */
+
+@keyframes goat-blink { 0%, 94%, 100% { transform: scaleY(0); } 97% { transform: scaleY(1); } }
+@keyframes goat-chew { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px) scaleX(0.9); } }
+@keyframes goat-bob { 0%, 100% { transform: translateY(0) rotate(12deg); } 50% { transform: translateY(-8px) rotate(12deg); } }
+@keyframes goat-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px) rotate(-2deg); } 75% { transform: translateX(8px) rotate(2deg); } }
+@keyframes goat-jitter { 0% { transform: translate(1px, -1px); } 100% { transform: translate(-1px, 1px); } }
+@keyframes goat-throb { 0%, 100% { opacity: 0.75; } 50% { opacity: 1; } }
+@keyframes goat-flame { from { transform: scaleY(0.9) skewX(-4deg); } to { transform: scaleY(1.12) skewX(4deg); } }
+@keyframes goat-spin { to { transform: rotate(360deg); } }
+@keyframes goat-twinkle { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .goat *, .goat__question { animation: none !important; }
+}
