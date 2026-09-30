@@ -8,7 +8,7 @@ import { SplitFlap } from '../fx/fx';
 import { PanicLayer } from '../fx/Panic';
 import { RitualCircle } from '../fx/RitualCircle';
 import { play, startTension, type Tension } from '../fx/sound';
-import { duckAmbient, ensureTrack, playLayer, stopTrack } from '../fx/tracks';
+import { duckAmbient, playLayer, stopTrack } from '../fx/tracks';
 import { LiveDot } from '../hud/Live';
 import { SceneFrame, useAfter, usePrimary, useNext } from '../stage';
 import { RiteDiagram } from './ActFour';
@@ -50,9 +50,6 @@ export function Exorcism() {
 
   useEffect(() => {
     actions.beginRite();
-    // Arriving here directly (hotkeys): the Priestess still chants.
-    duckAmbient(true);
-    ensureTrack('chant');
     return () => {
       tension.current?.stop();
       stopTrack('chant', 300);

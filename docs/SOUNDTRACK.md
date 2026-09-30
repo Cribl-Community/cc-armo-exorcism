@@ -9,7 +9,7 @@ Drop audio files into `public/assets/audio/` with these exact names. A slot with
 | `yes-reveal.mp3` | Clicking either YES | Among Us role-reveal sound | boom + whoosh + ominous chord |
 | `ambient-loop.mp3` (loops) | From just after YES to the end of the rite. It ducks under the CEO's offering and stops on restart | "Scary Instrumental Music – Darkness" | low filtered drone |
 | `ceo-offering.mp3` | Rite III, only when the CEO is sacrificed: from SACRIFICE until the judge leaves the altar (fades out) | "Unholy" (Epic Version) | dark minor choir |
-| `priestess-chant.mp3` (loops) | Rites VII–VIII, while the High Priestess heals the Goat; cut dead when the Goat resists | "In Nomine Patris" | heavenly choir |
+| `priestess-chant.mp3` | Rite VII: sung once (~5 s) as the High Priestess appears; the background ducks under it and returns when it ends (cut short if the judge moves on and the Goat resists first) | "In Nomine Patris" | heavenly choir |
 | `goat-scream.mp3` | Overlapping, pitch-shifted one-shots: every goatified name, the Goat resisting, the summons, the refusal, the Awakening, the final commandment | Screaming goat | synth goat scream |
 
 ## Current files (2026-09-30, licensed by the team)
@@ -23,7 +23,7 @@ All loudness-normalized to about −16 LUFS (true peak ≤ −1.5 dBFS). Total a
 | `yes-reveal.mp3` | Among Us role reveal (myinstants) | whole, 4.4 s |
 | `ceo-offering.mp3` | "Unholy – Epic Version" (YouTube 8NQAAUm3Hyw) | 0:52–1:32 (the loudest section), 3 s fade-out |
 | `ambient-loop.mp3` | "Scary Instrumental Music – Darkness" (YouTube sRjHVV0UjGc) | 0:00–2:36, mono 64 kbps, faded ends for the loop |
-| `priestess-chant.mp3` | "In Nomine Patris" (myinstants) | whole, 5.1 s, loops |
+| `priestess-chant.mp3` | "In Nomine Patris" (myinstants) | whole, 5.1 s, plays once |
 | `goat-scream.mp3` | "Screaming goat" (myinstants) | whole, 1.9 s, −14 LUFS |
 
 To re-cut a clip, change the trim points and re-encode with ffmpeg:

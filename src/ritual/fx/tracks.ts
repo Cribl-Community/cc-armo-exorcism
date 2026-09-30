@@ -21,7 +21,7 @@ const TRACKS: Record<Track, TrackDef> = {
   ceo: { file: 'assets/audio/ceo-offering.mp3', volume: 0.9, fallback: 'unholy' },
   ambient: { file: 'assets/audio/ambient-loop.mp3', volume: 0.32, loop: true, fallback: 'drone' },
   yes: { file: 'assets/audio/yes-reveal.mp3', volume: 1, fallback: 'reveal' },
-  chant: { file: 'assets/audio/priestess-chant.mp3', volume: 0.85, loop: true, fallback: 'choir' },
+  chant: { file: 'assets/audio/priestess-chant.mp3', volume: 0.85, fallback: 'choir' },
   scream: { file: 'assets/audio/goat-scream.mp3', volume: 0.85, fallback: 'scream' },
 };
 
@@ -41,6 +41,9 @@ type Loaded =
 
 const loaded = new Map<Track, Promise<Loaded>>();
 const playing = new Map<Track, Playing>();
+// Latest request per slot: if a slot is asked for twice before it loads, only the last one plays.
+const requests = new Map<Track, number>();
+let requestSeq = 0;
 let musicBus: GainNode | null = null;
 let ducked = false;
 let ambientOn = false;
@@ -96,7 +99,7 @@ export function preloadTracks(): void {
   });
 }
 
-function startBuffer(t: Track, buffer: AudioBuffer, level: number): Playing | null {
+function startBuffer(t: Track, buffer: AudioBuffer, level: number, onEnded: () => void): Playing | null {
   const b = bus();
   if (!b) return null;
   const src = b.ctx.createBufferSource();
@@ -108,6 +111,7 @@ function startBuffer(t: Track, buffer: AudioBuffer, level: number): Playing | nu
   gain.gain.setValueAtTime(0.0001, now);
   gain.gain.linearRampToValueAtTime(level, now + fadeIn);
   src.connect(gain).connect(b.out);
+  src.onended = onEnded;
   src.start();
   return {
     stop: (fadeMs) => {
@@ -126,7 +130,7 @@ function startBuffer(t: Track, buffer: AudioBuffer, level: number): Playing | nu
   };
 }
 
-function startElement(el: HTMLAudioElement, level: number, onBlocked: () => void): Playing {
+function startElement(el: HTMLAudioElement, level: number, onBlocked: () => void, onEnded: () => void): Playing {
   let fade = 0;
   const rampTo = (target: number, ms: number, then?: () => void) => {
     window.clearInterval(fade);
@@ -144,6 +148,7 @@ function startElement(el: HTMLAudioElement, level: number, onBlocked: () => void
   };
   el.currentTime = 0;
   el.volume = level;
+  el.addEventListener('ended', onEnded, { once: true });
   el.play().catch(onBlocked);
   return {
     stop: (ms) => rampTo(0, ms, () => { el.pause(); el.currentTime = 0; }),
@@ -161,23 +166,39 @@ function synth(t: Track): void {
 
 // ── Public API ────────────────────────────────────────────────────────────────────────────
 
-/** Play a slot: its file if available, otherwise the synth stand-in. */
-export function playTrack(t: Track): void {
+/**
+ * Play a slot: its file if available, otherwise the synth stand-in. `onEnd` runs when a
+ * one-shot finishes on its own (or is stopped), e.g. to bring the background music back up.
+ */
+export function playTrack(t: Track, opts: { onEnd?: () => void } = {}): void {
   playing.get(t)?.stop(150);
   playing.delete(t);
+  const request = ++requestSeq;
+  requests.set(t, request);
   const pending = loaded.get(t) ?? load(TRACKS[t]);
   loaded.set(t, pending);
   const requestedAt = performance.now();
   void pending.then((l) => {
+    if (requests.get(t) !== request) return; // superseded (or stopped) before it could start
     // A one-shot that took too long to load would land out of place: use the synth instead.
     const late = !TRACKS[t].loop && performance.now() - requestedAt > 1500;
     if (l.kind === 'missing' || late) {
       synth(t);
       return;
     }
-    const p = l.kind === 'buffer' ? startBuffer(t, l.buffer, levelFor(t)) : startElement(l.el, levelFor(t), () => synth(t));
-    if (p) playing.set(t, p);
-    else synth(t);
+    let handle: Playing | null = null;
+    const ended = () => {
+      if (playing.get(t) === handle) playing.delete(t);
+      opts.onEnd?.();
+    };
+    handle = l.kind === 'buffer' ? startBuffer(t, l.buffer, levelFor(t), ended) : startElement(l.el, levelFor(t), () => synth(t), ended);
+    if (handle) {
+      playing.set(t, handle);
+      if (import.meta.env.DEV) devLog.push(`${(performance.now() / 1000).toFixed(1)}s ${t}`);
+    } else {
+      synth(t);
+      opts.onEnd?.();
+    }
   });
 }
 
@@ -211,12 +232,8 @@ export function playLayer(t: Track, rate = 1, level = 1): void {
   });
 }
 
-/** Play a slot unless it is already playing (a scene handing a track to the next scene). */
-export function ensureTrack(t: Track): void {
-  if (!playing.has(t)) playTrack(t);
-}
-
 export function stopTrack(t: Track, fadeMs = 800): void {
+  requests.delete(t); // cancels a request still waiting for its file
   if (t === 'ambient') stopDrone();
   playing.get(t)?.stop(fadeMs);
   playing.delete(t);
@@ -247,8 +264,11 @@ export function stopAllTracks(): void {
   ducked = false;
 }
 
-// Dev only: `await __goatTracks()` in the console shows how each slot loaded (buffer / element / missing).
+// Dev only: `await __goatTracks()` shows how each slot loaded (buffer / element / missing);
+// `__goatTrackLog` lists every track start with its time.
+const devLog: string[] = [];
 if (import.meta.env.DEV) {
+  (window as unknown as Record<string, unknown>).__goatTrackLog = devLog;
   (window as unknown as Record<string, unknown>).__goatTracks = async () =>
     Object.fromEntries(await Promise.all([...loaded].map(async ([t, p]) => [t, (await p).kind] as const)));
 }

@@ -124,9 +124,10 @@ export function Priestess() {
   const { state, actions } = useRitual();
   const next = useNext();
   useEffect(() => {
-    // "In Nomine Patris" carries the healing through the exorcism; the background ducks under it.
+    // "In Nomine Patris" is sung once as the healing begins; the background ducks under it and
+    // comes back up when the chant ends.
     duckAmbient(true);
-    playTrack('chant');
+    playTrack('chant', { onEnd: () => duckAmbient(false) });
     // If the judge jumped here directly (← / hotkeys), make sure the rite has begun.
     actions.beginRite();
   }, [actions]);
