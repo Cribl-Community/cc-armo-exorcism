@@ -1,6 +1,5 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { motion } from 'motion/react';
-import { Button, Card, Text } from '@capra/core';
 import { useRitual } from '../../state/ritual';
 import { scripture, summarizeScripture } from '../../cribl/client';
 import type { FinalChoice, Sourced } from '../../cribl/types';
@@ -8,6 +7,7 @@ import { Goat, type GoatState } from '../goat/Goat';
 import { CHARACTERS } from '../characters/characters';
 import { celebrate } from '../fx/fx';
 import { play } from '../fx/sound';
+import { playLayer } from '../fx/tracks';
 import { LiveDot } from '../hud/Live';
 import { SceneFrame, useAfter, usePrimary, useNext } from '../stage';
 import { formatCount, incidentTicket, pipelineOffering } from './shared';
@@ -29,6 +29,7 @@ export function FinalButton() {
   const summon = () => {
     choose('summon');
     play('rumble');
+    playLayer('scream', 0.55, 0.9); // a slowed, demonic goat answers the summons
     next();
   };
   usePrimary(summon, 'final');
@@ -36,7 +37,7 @@ export function FinalButton() {
   const flee = () => {
     if (runGaveUp) return;
     choose('run');
-    play('tick');
+    play('whoosh');
     setRunFlees((n) => n + 1);
     const angle = Math.random() * Math.PI * 2;
     setRunPos({ x: Math.cos(angle) * (18 + Math.random() * 14), y: Math.sin(angle) * (10 + Math.random() * 8) });
@@ -52,7 +53,7 @@ export function FinalButton() {
   useAfter(calm === 'lulling' ? 3900 : null, () => {
     setCalm('refused');
     setGoat('ANGRY');
-    play('bleat');
+    playLayer('scream', 0.85);
   });
 
   return (
@@ -94,7 +95,8 @@ export function Awakening() {
   const next = useNext();
   const [beat, setBeat] = useState(0);
   useEffect(() => {
-    play('scream');
+    playLayer('scream', 0.75);
+    playLayer('scream', 1.15, 0.6);
     const t = setTimeout(() => { celebrate(); play('choir'); setBeat(1); }, 1300);
     return () => clearTimeout(t);
   }, []);
@@ -189,67 +191,6 @@ export function Report() {
       <div className="r-report__actions">
         <button className="r-btn r-btn--gold" onClick={() => next()}>📜 VIEW THE SCRIPTURE</button>
         <button className="r-btn r-btn--ghost" onClick={() => actions.restart()}>↺ BEGIN AGAIN</button>
-      </div>
-    </SceneFrame>
-  );
-}
-
-// ── The Reveal — what the Goat actually did ─────────────────────────────────────────────
-
-export function Reveal() {
-  const { state, actions } = useRitual();
-  const entries = useSyncExternalStore(scripture.subscribe, scripture.getSnapshot);
-  const s = summarizeScripture(entries);
-  const ex = state.rite?.value.exorcism;
-  usePrimary(() => actions.restart(), 'reveal');
-
-  const engineReal = Boolean(state.rite && !state.rite.simulated);
-  const facts: Array<[string, string]> = [
-    ['Cribl API calls', state.demo ? `${s.simulated} (simulated)` : String(s.calls)],
-    ['Cribl engine runs (pipeline preview)', engineReal ? `${s.engineRuns} · ${((state.rite?.value.ms ?? 0) / 1000).toFixed(1)} s` : state.rite ? '1 (emulated)' : '0'],
-    ['Events processed by the engine', ex ? String(ex.eventsIn + (state.rite?.value.goatified.length ?? 0)) : '—'],
-    ['Heresy removed', ex ? `${ex.bytesReducedPct}% of bytes` : '—'],
-    ['KV writes (Book of Offerings)', String(s.kvWrites)],
-    ['Blocked attempts', String(s.blocked)],
-    ['Config mutations', String(s.configMutations)],
-  ];
-
-  return (
-    <SceneFrame className="r-reveal">
-      <div className="r-reveal__card">
-        <Card>
-          <Card.Header>
-            <Card.Title variant="heading-lg">What the Goat actually did.</Card.Title>
-            <Card.Description>
-              {state.demo ? 'Performed from memory: these are the calls live mode would make.' : `Live, on Cribl ${state.leader?.value.version ?? ''} · Worker Group ${state.group?.value.chosen ?? ''}`}
-            </Card.Description>
-          </Card.Header>
-          <Card.Content>
-            <dl className="r-reveal__facts">
-              {facts.map(([k, v]) => (
-                <div key={k} className="r-reveal__fact">
-                  <dt><Text variant="body-sm-normal" color="subtle">{k}</Text></dt>
-                  <dd><Text variant="metric-md">{v}</Text></dd>
-                </div>
-              ))}
-            </dl>
-            <Text as="h3" variant="heading-xs">Pipeline functions executed</Text>
-            <p className="r-reveal__functions">comment · drop · mask · eval · sampling · eval ×3 · rename</p>
-            <Text as="h3" variant="heading-xs">Endpoints the Goat touched</Text>
-            <ul className="r-reveal__endpoints">
-              {s.endpoints.map((e) => <li key={e}><code>✓ {e}</code></li>)}
-              {s.endpoints.length === 0 && <li><Text variant="body-sm-normal" color="subtle">None: performed from memory.</Text></li>}
-            </ul>
-            <Text as="p" variant="body-sm-normal" color="subtle">
-              Built on the Cribl App Platform: a sandboxed iframe app, the platform fetch proxy, least-privilege
-              policies.yml (read + preview only) and the app-scoped KV store.
-            </Text>
-          </Card.Content>
-          <Card.Footer>
-            <Button variant="secondary" onClick={() => actions.patch({ scriptureOpen: true })}>Open the Scripture</Button>
-            <Button variant="primary" onClick={() => actions.restart()}>Begin again</Button>
-          </Card.Footer>
-        </Card>
       </div>
     </SceneFrame>
   );

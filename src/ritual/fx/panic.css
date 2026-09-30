@@ -1,0 +1,106 @@
+/* Panic layer and ritual circle — ritual art layer. */
+
+.r-panic { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 2; }
+
+.r-panic__goat {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1em;
+  animation-name: r-stampede-left;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  filter: drop-shadow(0 0.2rem 0.3rem rgb(0 0 0 / 0.4));
+}
+.r-panic__goat--left { left: 105%; }
+.r-panic__goat--right { right: 105%; animation-name: r-stampede-right; flex-direction: row-reverse; }
+/* The goat emoji faces left: runners heading right are mirrored. */
+.r-panic__goat--right .r-panic__body { transform: scaleX(-1); }
+.r-panic__body { display: inline-block; animation: r-gallop 0.28s ease-in-out infinite alternate; }
+.r-panic__goat--jump .r-panic__body { animation: r-leap 0.7s ease-in-out infinite; }
+.r-panic__dust { font-size: 0.6em; opacity: 0.8; }
+.r-panic__goat--left .r-panic__dust { order: 2; }
+
+@keyframes r-stampede-left { from { transform: translateX(0); } to { transform: translateX(-130vw); } }
+@keyframes r-stampede-right { from { transform: translateX(0); } to { transform: translateX(130vw); } }
+@keyframes r-gallop { from { transform: translateY(0) rotate(-6deg); } to { transform: translateY(-0.25em) rotate(6deg); } }
+.r-panic__goat--right .r-panic__body { animation-name: r-gallop-mirrored; }
+@keyframes r-gallop-mirrored { from { transform: scaleX(-1) translateY(0) rotate(-6deg); } to { transform: scaleX(-1) translateY(-0.25em) rotate(6deg); } }
+@keyframes r-leap { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-1.4em) rotate(-25deg); } }
+
+/* The CEO's ghost drifts in a lazy figure of eight. */
+.r-ghost { position: absolute; left: 6%; top: 18%; width: clamp(5rem, 11vw, 9rem); animation: r-haunt 14s ease-in-out infinite; }
+.r-ghost__body { width: 100%; overflow: visible; animation: r-float 2.2s ease-in-out infinite; }
+.r-ghost__sheet { fill: rgb(235 245 255 / 0.82); stroke: rgb(160 200 255 / 0.9); stroke-width: 1.5; filter: drop-shadow(0 0 8px rgb(170 210 255 / 0.9)); }
+.r-ghost__arm { fill: none; stroke: rgb(235 245 255 / 0.85); stroke-width: 6; stroke-linecap: round; transform-origin: 10px 60px; animation: r-wave 0.8s ease-in-out infinite alternate; }
+.r-ghost__arm--right { transform-origin: 90px 60px; animation-delay: 0.4s; }
+.r-ghost__face { filter: grayscale(1) contrast(1.1) brightness(1.15); opacity: 0.8; }
+.r-ghost__halo { fill: rgb(150 190 255 / 0.25); stroke: none; }
+.r-ghost__bubble {
+  position: absolute;
+  left: 85%;
+  top: -0.6rem;
+  width: max-content;
+  max-width: 14rem;
+  padding: 0.35em 0.7em;
+  border-radius: 0.8rem;
+  background: rgb(235 245 255 / 0.92);
+  color: #1d2340;
+  font-family: var(--r-font-display);
+  font-weight: 700;
+  font-size: clamp(0.7rem, 1.1vw, 1rem);
+  animation: r-float 2.2s ease-in-out infinite reverse;
+}
+
+@keyframes r-haunt {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(28vw, 30vh); }
+  50% { transform: translate(62vw, 4vh); }
+  75% { transform: translate(34vw, -8vh); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes r-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes r-wave { from { transform: rotate(-12deg); } to { transform: rotate(18deg); } }
+
+/* ── Ritual circle (the exorcism) ─────────────────────────────────────────── */
+
+.r-circle { position: relative; width: var(--circle-size); aspect-ratio: 1; display: grid; place-items: center; }
+.r-circle__runes { position: absolute; inset: 0; animation: r-spin calc(24s - var(--tension, 0) * 18s) linear infinite; }
+.r-circle__runes text { font-family: var(--r-font-display); font-weight: 700; font-size: 6.4px; letter-spacing: 1.5px; fill: var(--r-gold); }
+.r-circle__ring { fill: none; stroke: var(--r-gold); stroke-width: 0.8; opacity: 0.8; }
+.r-circle__star { fill: none; stroke: var(--r-blood); stroke-width: 0.7; opacity: calc(0.35 + var(--tension, 0) * 0.65); filter: drop-shadow(0 0 2px var(--r-blood)); animation: r-spin calc(40s - var(--tension, 0) * 32s) linear infinite reverse; transform-origin: 50px 50px; }
+.r-circle__candles { position: absolute; inset: 0; animation: r-spin calc(16s - var(--tension, 0) * 12s) linear infinite reverse; }
+.r-circle__candle { position: absolute; left: 50%; top: 50%; font-size: calc(var(--circle-size) * 0.07); transform: rotate(var(--a)) translateY(calc(var(--circle-size) * -0.5)) rotate(calc(var(--a) * -1)); translate: -50% -50%; }
+.r-circle__goat { width: 58%; position: relative; z-index: 2; }
+
+.r-caster { position: relative; display: flex; flex-direction: column; align-items: center; }
+.r-caster .tarot { width: clamp(6rem, min(12vw, 24vh), 12rem); }
+.r-caster__word {
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  white-space: nowrap;
+  font-family: var(--r-font-display);
+  font-weight: 900;
+  font-size: clamp(0.8rem, 1.4vw, 1.3rem);
+  color: var(--r-gold);
+  text-shadow: 0 0 0.6em var(--r-glow);
+  animation: r-chant-word 2.4s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes r-chant-word { 0% { opacity: 0; transform: translate(-50%, 0) scale(0.8); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(-10%, -7rem) scale(1.25) rotate(-8deg); } }
+
+.r-beam {
+  position: absolute;
+  top: 42%;
+  left: 80%;
+  width: var(--beam-length, 14vw);
+  height: calc(4px + var(--tension, 0) * 18px);
+  transform-origin: left center;
+  background: linear-gradient(90deg, rgb(255 246 214 / 0.95), rgb(25 227 201 / 0.8) 60%, rgb(255 246 214 / 0));
+  border-radius: 999px;
+  filter: blur(calc(1px + var(--tension, 0) * 3px)) drop-shadow(0 0 10px rgb(25 227 201 / 0.9));
+  animation: r-beam 0.18s steps(2) infinite;
+  z-index: 1;
+}
+@keyframes r-beam { 50% { opacity: 0.7; transform: scaleY(1.3); } }

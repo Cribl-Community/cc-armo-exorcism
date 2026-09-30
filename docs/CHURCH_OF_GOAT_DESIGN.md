@@ -951,3 +951,12 @@ What was built, and where it deviates from §2–§11 and `BUILD_PROMPT.md`:
 - **Packaging on OneDrive:** `npm run package` fails or produces an empty archive when the project sits in a OneDrive-synced folder. The CLI rebuilds `dist/` and tar then reads files OneDrive is still syncing. Either keep the repo outside OneDrive, or run `npm run build`, wait for sync, and pack with the `@cribl/apps` packer directly (`createAppPack`).
 - **Portraits (2026-09-30):** the four photos are processed by `tools/tarotize.py` into 560×640 tarot faces. Processing: aspect kept, headroom added, per-card duotone, light posterize, vignette. `src/ritual/characters/Costume.tsx` then draws the costume over each face: Arno's blueprint grid and telemetry orbit, Moïse's cables, terminal rain and FORBIDDEN seal, the CEO's bar-chart crown, the Priestess's halo and light. CEO and Priestess keep their titles, with no names. For fully illustrated versions, run the §10.3 image-generation prompts and drop the results in `public/assets/characters/` (same file names, 560×640).
 - **Soundtrack slots (2026-09-30):** five file-based tracks (`src/ritual/fx/tracks.ts`, documented in `docs/SOUNDTRACK.md`): Façade sting, goat intro choir, YES reveal, ambient loop, CEO offering. Each falls back to a synthesized cue when its file is missing. Because the iframe usually can't autoplay, the Façade waits for the first click ("🔊 This overview has sound…", max 12 s) and that click opens the eye with the sting.
+- **Feedback round (2026-09-30):**
+  - **Incident:** redesigned to one screen: "Your Cribl is possessed. Here is the evidence.", four evidence tiles that possess themselves into 666, heresy rated in goats, the Goat's routes as chains, and a log ticker.
+  - **Scroll guide:** "⬇ THE GOAT AWAITS BELOW" appears on any scene whose next button is out of view.
+  - **Possessed hover:** random jitter, melt, eyes or flip, each with its own sound.
+  - **Builders:** foley added.
+  - **Exorcism:** the Priestess performs in a rotating rune circle with a beam, floating chants, and escalating visual and audio tension over the chant; she is thrown out when the Goat resists.
+  - **Possession:** a stampeding herd, the CEO's ghost, and pitch-varied screaming goats per flip.
+  - **Chiptune-like cues replaced:** glitch, tick, lullaby.
+  - **Finale:** "The Scripture" turns every real endpoint called into a Commandment, read aloud by the Goat (Web Speech API), with miracle stamps, a head-banging congregation, and a credits roll.

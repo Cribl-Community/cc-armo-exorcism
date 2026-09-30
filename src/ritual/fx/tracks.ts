@@ -5,7 +5,7 @@
 // synthesized cue in sound.ts stands in, so the ritual never goes silent.
 import { audioBus, isMuted, onMuteChange, play, startDrone, stopDrone, type Cue } from './sound';
 
-export type Track = 'facade' | 'intro' | 'ceo' | 'ambient' | 'yes';
+export type Track = 'facade' | 'intro' | 'ceo' | 'ambient' | 'yes' | 'chant' | 'scream';
 
 interface TrackDef {
   file: string;
@@ -21,6 +21,8 @@ const TRACKS: Record<Track, TrackDef> = {
   ceo: { file: 'assets/audio/ceo-offering.mp3', volume: 0.9, fallback: 'unholy' },
   ambient: { file: 'assets/audio/ambient-loop.mp3', volume: 0.32, loop: true, fallback: 'drone' },
   yes: { file: 'assets/audio/yes-reveal.mp3', volume: 1, fallback: 'reveal' },
+  chant: { file: 'assets/audio/priestess-chant.mp3', volume: 0.85, loop: true, fallback: 'choir' },
+  scream: { file: 'assets/audio/goat-scream.mp3', volume: 0.85, fallback: 'scream' },
 };
 
 const DUCK = 0.15;
@@ -177,6 +179,41 @@ export function playTrack(t: Track): void {
     if (p) playing.set(t, p);
     else synth(t);
   });
+}
+
+/**
+ * Fire a slot as an overlapping one-shot at a given playback rate (a herd of screaming goats at
+ * different pitches). Does not stop earlier instances.
+ */
+export function playLayer(t: Track, rate = 1, level = 1): void {
+  const pending = loaded.get(t) ?? load(TRACKS[t]);
+  loaded.set(t, pending);
+  void pending.then((l) => {
+    if (l.kind === 'buffer') {
+      const b = bus();
+      if (!b) return;
+      const src = b.ctx.createBufferSource();
+      src.buffer = l.buffer;
+      src.playbackRate.value = rate;
+      const g = b.ctx.createGain();
+      g.gain.value = TRACKS[t].volume * level;
+      src.connect(g).connect(b.out);
+      src.start();
+    } else if (l.kind === 'element') {
+      const el = l.el.cloneNode() as HTMLAudioElement;
+      el.playbackRate = rate;
+      el.volume = Math.min(1, TRACKS[t].volume * level);
+      el.muted = isMuted();
+      el.play().catch(() => synth(t));
+    } else {
+      synth(t);
+    }
+  });
+}
+
+/** Play a slot unless it is already playing (a scene handing a track to the next scene). */
+export function ensureTrack(t: Track): void {
+  if (!playing.has(t)) playTrack(t);
 }
 
 export function stopTrack(t: Track, fadeMs = 800): void {

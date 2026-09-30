@@ -72,15 +72,16 @@ export function Sparkline({ points, className }: { points: number[]; className?:
 }
 
 /** Split-flap tile that flips from the mortal name to the goat name. */
-export function SplitFlap({ from, to, delayMs }: { from: string; to: string; delayMs: number }) {
+export function SplitFlap({ from, to, delayMs, onFlip }: { from: string; to: string; delayMs: number; onFlip?: () => void }) {
   const [flipped, setFlipped] = useState(false);
+  const flip = useLatest(onFlip);
   useEffect(() => {
     const t = setTimeout(() => {
       setFlipped(true);
-      play('glitch');
+      flip.current?.();
     }, delayMs);
     return () => clearTimeout(t);
-  }, [delayMs]);
+  }, [delayMs, flip]);
   return (
     <span className={`r-flap ${flipped ? 'r-flap--flipped' : ''}`}>
       <span className="r-flap__from">{from}</span>

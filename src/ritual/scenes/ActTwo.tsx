@@ -7,7 +7,7 @@ import { CHARACTERS } from '../characters/characters';
 import { CountUp, Glitch, Sparkline, corrupt } from '../fx/fx';
 import { Particles } from '../fx/Particles';
 import { play } from '../fx/sound';
-import { duckAmbient, playTrack, stopTrack } from '../fx/tracks';
+import { duckAmbient, playLayer, playTrack, stopTrack } from '../fx/tracks';
 import { LiveDot } from '../hud/Live';
 import { SceneFrame, useAfter, usePrimary, useNext } from '../stage';
 import { SACRIFICE_NAME, formatBytes, pipelineOffering } from './shared';
@@ -38,7 +38,7 @@ export function Sacrifice() {
   const finish = () => {
     setPhase('pleased');
     // The CEO's offering already has its own soundtrack; don't pile a choir on top.
-    if (starving) play('scream');
+    if (starving) playLayer('scream', 0.8);
     else if (chosen !== 'ceo') play('choir');
   };
   // Leaving the altar: the CEO's track fades out and the background comes back up.

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Card, Pill, Text } from '@capra/core';
+import { useEffect, useState } from 'react';
+import { Card, Text } from '@capra/core';
 import { useRitual } from '../../state/ritual';
 import type { HeresyItem, RouteInfo, Sourced } from '../../cribl/types';
 import { play } from '../fx/sound';
@@ -8,53 +8,61 @@ import { usePrimary, useNext } from '../stage';
 import { formatBytes, formatCount, incidentTicket } from './shared';
 
 // ── Rite V — Incident Response ──────────────────────────────────────────────────────────
-// The tone snaps to a sober SOC screen: genuine Capra components over the real census.
+// A SOC screen that makes sense in five seconds: one sentence, four pieces of evidence, the
+// heresy, where the Goat travels, and one button. Real Capra components over the real census.
 
-function Kpi({ label, sacred, value, of }: { label: string; sacred: string; value: string; of?: Sourced<unknown> }) {
+/** Every few seconds a number is briefly possessed and reads 666. */
+function usePossessedNumber(value: string, seed: number): string {
+  const [possessed, setPossessed] = useState(false);
+  useEffect(() => {
+    let off = 0;
+    const id = window.setInterval(() => {
+      setPossessed(true);
+      off = window.setTimeout(() => setPossessed(false), 280);
+    }, 3200 + seed * 900);
+    return () => {
+      window.clearInterval(id);
+      window.clearTimeout(off);
+    };
+  }, [seed]);
+  return possessed ? value.replace(/\d/g, '6') : value;
+}
+
+function Evidence({ emoji, sacred, meaning, value, of, seed }: { emoji: string; sacred: string; meaning: string; value: string; of?: Sourced<unknown>; seed: number }) {
+  const shown = usePossessedNumber(value, seed);
   return (
     <div className="r-incident__kpi">
       <Card>
-        <Card.Header>
-          <Card.Title variant="heading-xs">{sacred}</Card.Title>
-          <Card.Description>{label}</Card.Description>
-        </Card.Header>
         <Card.Content>
-          <span className="r-incident__value"><Text variant="metric-xl">{value}</Text> <LiveDot of={of} /></span>
+          <div className="r-evidence">
+            <span className="r-evidence__emoji" aria-hidden="true">{emoji}</span>
+            <span className="r-evidence__body">
+              <Text variant="body-sm-semibold" color="subtle">{sacred}</Text>
+              <span className="r-evidence__value"><Text variant="metric-lg">{shown}</Text> <LiveDot of={of} /></span>
+              <Text variant="body-sm-normal" color="subtle">{meaning}</Text>
+            </span>
+          </div>
         </Card.Content>
       </Card>
     </div>
   );
 }
 
-function RoutingGraph({ routes }: { routes: RouteInfo[] }) {
-  const shown = routes.filter((r) => !r.disabled).slice(0, 5);
-  const pipelines = [...new Set(shown.map((r) => r.pipeline))];
-  const outputs = [...new Set(shown.map((r) => r.output))];
-  const rowY = (i: number, n: number) => 30 + (i * 240) / Math.max(n - 1, 1);
-  const y = (list: string[], v: string) => rowY(list.indexOf(v), list.length);
+function RouteChains({ routes }: { routes: RouteInfo[] }) {
+  const shown = routes.filter((r) => !r.disabled && r.pipeline).slice(0, 3);
+  if (shown.length === 0) return <Text variant="body-sm-normal" color="subtle">The Goat has no routes. It walks where it wants.</Text>;
   return (
-    <svg className="r-routing" viewBox="0 0 720 300" role="img" aria-label="Routes to pipelines to destinations">
+    <ol className="r-chains">
       {shown.map((r, i) => (
-        <g key={r.name + i}>
-          <path className="r-routing__edge" d={`M 200 ${rowY(i, shown.length)} C 260 ${rowY(i, shown.length)}, 250 ${y(pipelines, r.pipeline)}, 300 ${y(pipelines, r.pipeline)}`} />
-          <path className="r-routing__edge" d={`M 460 ${y(pipelines, r.pipeline)} C 510 ${y(pipelines, r.pipeline)}, 500 ${y(outputs, r.output)}, 560 ${y(outputs, r.output)}`} />
-        </g>
+        <li key={r.name + i} className="r-chain">
+          <code>{r.name}</code>
+          <span className="r-chain__arrow" aria-hidden="true">🐾</span>
+          <code className="r-chain__pipe">{r.pipeline}</code>
+          <span className="r-chain__arrow" aria-hidden="true">🐾</span>
+          <code>{r.output}</code>
+        </li>
       ))}
-      {shown.map((r, i) => <Node key={`r${i}`} x={10} y={rowY(i, shown.length)} label={r.name} caption="rite of routing" />)}
-      {pipelines.map((p, i) => <Node key={`p${i}`} x={300} y={rowY(i, pipelines.length)} label={p} caption="sacred pipeline" accent />)}
-      {outputs.map((o, i) => <Node key={`o${i}`} x={560} y={rowY(i, outputs.length)} label={o} caption="holy destination" />)}
-    </svg>
-  );
-}
-
-function Node({ x, y, label, caption, accent }: { x: number; y: number; label: string; caption: string; accent?: boolean }) {
-  const w = accent ? 160 : 150;
-  return (
-    <g transform={`translate(${x} ${y - 20})`} className={`r-routing__node ${accent ? 'r-routing__node--accent' : ''}`}>
-      <rect width={w} height="40" rx="8" />
-      <text x={w / 2} y="18" textAnchor="middle" className="r-routing__label">{label.length > 20 ? `${label.slice(0, 19)}…` : label}</text>
-      <text x={w / 2} y="33" textAnchor="middle" className="r-routing__caption">{caption}</text>
-    </g>
+    </ol>
   );
 }
 
@@ -74,7 +82,7 @@ export function Incident() {
   const seen = new Set<string>();
   const heresy = [...statusHeresy, ...(state.inputHeresy?.value ?? []), ...leaderHeresy]
     .filter((h) => !seen.has(h.title) && seen.add(h.title))
-    .slice(0, 6);
+    .slice(0, 4);
 
   const summon = () => {
     play('bell');
@@ -83,26 +91,32 @@ export function Incident() {
   };
   usePrimary(summon, 'incident');
 
-  const sources = (c?.sources.value ?? []).slice(0, 8);
   const [incidentId] = useState(() => incidentTicket(state.soulNumber));
+  const scroll = state.scrolls?.value[0];
+  const kindLabel = { source: 'source', destination: 'destination', leader: 'the Leader' } as const;
 
   return (
     <section className="r-scene r-incident">
       <div className="r-siren" role="alert">
-        <span>🚨 DEMONIC TELEMETRY INCIDENT — SEV-0 (GOAT)</span>
-        <span className="r-siren__id">{incidentId}</span>
+        <span className="r-siren__title">🚨 DEMONIC TELEMETRY INCIDENT · SEV-GOAT</span>
+        <span className="r-siren__meta">Commander: 🐐 The Goat (self-appointed) · Status: getting worse · {incidentId}</span>
       </div>
+
+      <h1 className="r-incident__headline">
+        Your Cribl is possessed. <span className="r-incident__sub">Here is the evidence.</span>
+      </h1>
+
       <div className="r-incident__grid">
-        <Kpi sacred="OFFERINGS" label="Events, last 24 h" value={totals ? formatCount(totals.value.events) : '…'} of={totals} />
-        <Kpi sacred="GOAT FUEL" label="Bytes, last 24 h" value={totals ? formatBytes(totals.value.bytes) : '…'} of={totals} />
-        <Kpi sacred="SACRED PIPELINES" label="Pipelines" value={c ? String(c.pipelines.value.length) : '…'} of={c?.pipelines} />
-        <Kpi sacred="HOLY DESTINATIONS" label="Destinations" value={c ? String(c.destinations.value.length) : '…'} of={c?.destinations} />
+        <Evidence seed={0} emoji="🐐" sacred="OFFERINGS" value={totals ? formatCount(totals.value.events) : '…'} meaning="events the Goat ate in 24 h" of={totals} />
+        <Evidence seed={1} emoji="⛽" sacred="GOAT FUEL" value={totals ? formatBytes(totals.value.bytes) : '…'} meaning="of data it digested" of={totals} />
+        <Evidence seed={2} emoji="🕯️" sacred="SACRED PIPELINES" value={c ? String(c.pipelines.value.length) : '…'} meaning="pipelines now chanting" of={c?.pipelines} />
+        <Evidence seed={3} emoji="⛪" sacred="HOLY DESTINATIONS" value={c ? String(c.destinations.value.length) : '…'} meaning="places it can reach" of={c?.destinations} />
 
         <div className="r-incident__heresy">
           <Card>
             <Card.Header>
-              <Card.Title variant="heading-xs">HERESY</Card.Title>
-              <Card.Description>Unhealthy sources, destinations and Leader errors</Card.Description>
+              <Card.Title variant="heading-xs">😈 HERESY DETECTED</Card.Title>
+              <Card.Description>Things that are not OK, rated in goats <LiveDot of={state.inputHeresy} /></Card.Description>
             </Card.Header>
             <Card.Content>
               {heresy.length === 0 ? (
@@ -111,16 +125,13 @@ export function Incident() {
                 <ul className="r-heresy-list">
                   {heresy.map((h) => (
                     <li key={h.kind + h.title}>
-                      <Pill appearance={h.severity === 'Red' ? 'danger' : 'warning'} variant="muted">{h.kind}</Pill>
+                      <span className="r-heresy-list__goats" aria-label={h.severity === 'Red' ? 'critical' : 'warning'}>{h.severity === 'Red' ? '🐐🐐🐐' : '🐐'}</span>
                       <Text variant="body-sm-normal">{h.title}</Text>
+                      <Text variant="body-xs-normal" color="subtle">{kindLabel[h.kind]}</Text>
                     </li>
                   ))}
                 </ul>
               )}
-              {totals && totals.value.dropped > 0 && (
-                <Text as="p" variant="body-sm-normal" color="subtle">{formatCount(totals.value.dropped)} offerings dropped in 24 h</Text>
-              )}
-              <span className="r-incident__sigils"><LiveDot of={state.inputHeresy} /><LiveDot of={state.leader} /></span>
             </Card.Content>
           </Card>
         </div>
@@ -128,61 +139,25 @@ export function Incident() {
         <div className="r-incident__routing">
           <Card>
             <Card.Header>
-              <Card.Title variant="heading-xs">SACRED ROUTING</Card.Title>
-              <Card.Description>Routes → pipelines → destinations</Card.Description>
+              <Card.Title variant="heading-xs">🗺️ WHERE THE GOAT TRAVELS</Card.Title>
+              <Card.Description>Route → Sacred Pipeline → Holy Destination <LiveDot of={c?.routes} /></Card.Description>
             </Card.Header>
             <Card.Content>
-              <RoutingGraph routes={c?.routes.value ?? []} />
-              <LiveDot of={c?.routes} />
-            </Card.Content>
-          </Card>
-        </div>
-
-        <div className="r-incident__sources">
-          <Card>
-            <Card.Header>
-              <Card.Title variant="heading-xs">ALTARS</Card.Title>
-              <Card.Description>Sources <LiveDot of={c?.sources} /></Card.Description>
-            </Card.Header>
-            <Card.Content>
-              <table className="r-table">
-                <thead><tr><th>Source</th><th>Type</th><th>Health</th></tr></thead>
-                <tbody>
-                  {sources.map((s) => (
-                    <tr key={s.id}>
-                      <td><code>{s.id}</code></td>
-                      <td>{s.type}</td>
-                      <td><Pill appearance={s.health === 'Green' ? 'success' : s.health === 'Red' ? 'danger' : s.health === 'Yellow' ? 'warning' : 'default'} variant="muted">{s.health}</Pill></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </Card.Content>
-          </Card>
-        </div>
-
-        <div className="r-incident__scrolls">
-          <Card>
-            <Card.Header>
-              <Card.Title variant="heading-xs">HERESY SCROLLS</Card.Title>
-              <Card.Description>Recent errors in Cribl’s own logs (Cribl Search) <LiveDot of={state.scrolls} /></Card.Description>
-            </Card.Header>
-            <Card.Content>
-              {!state.scrolls ? (
-                <Text variant="body-sm-normal" color="subtle">The scrolls are still unrolling…</Text>
-              ) : state.scrolls.value.length === 0 ? (
-                <Text variant="body-sm-normal" color="subtle">{state.scrolls.simulated ? state.scrolls.reason : 'The scrolls are blank. The logs are clean. Too clean.'}</Text>
-              ) : (
-                <ul className="r-scroll-list">
-                  {state.scrolls.value.map((s, i) => <li key={i}><code>{s.channel}</code> {s.message}</li>)}
-                </ul>
-              )}
+              <RouteChains routes={c?.routes.value ?? []} />
             </Card.Content>
           </Card>
         </div>
       </div>
+
+      <div className="r-ticker" aria-live="polite">
+        <span className="r-ticker__label">📜 OVERHEARD IN CRIBL'S LOGS <LiveDot of={state.scrolls} /></span>
+        <span className="r-ticker__text">
+          {scroll ? `“${scroll.message}”` : state.scrolls ? 'Silence. The logs refuse to speak.' : 'Listening at the door…'}
+        </span>
+      </div>
+
       <div className="r-incident__action">
-        <button className="r-btn r-btn--blood" onClick={summon}>SUMMON THE BUILDERS</button>
+        <button className="r-btn r-btn--blood" onClick={summon}>🛠️ SUMMON THE BUILDERS</button>
       </div>
     </section>
   );

@@ -3,17 +3,18 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useRitual } from '../../state/ritual';
 import { CharacterCard } from '../characters/TarotCard';
 import { CHARACTERS } from '../characters/characters';
-import { play } from '../fx/sound';
+import { play, type Cue } from '../fx/sound';
+import { duckAmbient, playTrack, stopTrack } from '../fx/tracks';
 import { SceneFrame, useAfter, usePrimary, useNext } from '../stage';
 import { RITE_NODES, useElapsed } from './shared';
 
 // ── Rite VI — The Builders Appear ───────────────────────────────────────────────────────
 
-const DIALOGUE: Array<{ who: 'arno' | 'moise'; line: string; ms: number }> = [
-  { who: 'arno', line: 'I think I know what happened.', ms: 1900 },
-  { who: 'moise', line: 'Don’t touch anything.', ms: 1700 },
-  { who: 'arno', line: 'I already touched it.', ms: 1900 },
-  { who: 'moise', line: '…', ms: 2600 },
+const DIALOGUE: Array<{ who: 'arno' | 'moise'; line: string; ms: number; sound: Cue }> = [
+  { who: 'arno', line: 'I think I know what happened.', ms: 1900, sound: 'babbleLow' },
+  { who: 'moise', line: 'Don’t touch anything.', ms: 1700, sound: 'babbleHigh' },
+  { who: 'arno', line: 'I already touched it.', ms: 1900, sound: 'babbleLow' },
+  { who: 'moise', line: '…', ms: 2600, sound: 'crickets' },
 ];
 
 export function Builders() {
@@ -29,8 +30,20 @@ export function Builders() {
     const t = setTimeout(() => setStep((s) => s + 1), ms);
     return () => clearTimeout(t);
   }, [step, done, moiseLeft]);
+  // Foley: the cards slam down, each line gets a voice, "…" gets crickets, and Moïse gets yeeted.
   useEffect(() => {
-    if (step === 0) play('thud');
+    stopTrack('chant', 600); // coming back from the Priestess: silence her
+    const a = setTimeout(() => play('slam'), 520);
+    const b = setTimeout(() => play('slam'), 800);
+    return () => {
+      clearTimeout(a);
+      clearTimeout(b);
+    };
+  }, []);
+  useEffect(() => {
+    if (step >= 0 && step < DIALOGUE.length) play(DIALOGUE[step].sound);
+    if (step === DIALOGUE.length) play('bell');
+    if (step === DIALOGUE.length + 1) play('yeet');
   }, [step]);
 
   usePrimary(moiseLeft ? () => next() : () => setStep((s) => Math.min(s + 1, DIALOGUE.length + 1)), `builders:${step}`);
@@ -39,15 +52,21 @@ export function Builders() {
   return (
     <SceneFrame className="r-builders">
       <div className="r-builders__cast">
-        <motion.div className="r-builders__slot" initial={{ y: '-120vh', rotate: -8 }} animate={{ y: 0, rotate: -3 }} transition={{ type: 'spring', stiffness: 90, damping: 11 }}>
+        <motion.div
+          className={`r-builders__slot ${step === 2 ? 'r-builders__slot--guilty' : ''}`}
+          initial={{ y: '-120vh', rotate: -8 }}
+          animate={{ y: 0, rotate: -3 }}
+          transition={{ type: 'spring', stiffness: 90, damping: 11 }}
+        >
+          {step === 2 && <span className="r-sweat" aria-hidden="true">💦</span>}
           <CharacterCard character={CHARACTERS.arno} size="lg" />
           <AnimatePresence>{line?.who === 'arno' && <Bubble key={step} text={line.line} side="left" />}</AnimatePresence>
         </motion.div>
         <motion.div
           className="r-builders__slot"
           initial={{ y: '-120vh', rotate: 8 }}
-          animate={moiseLeft ? { x: '120vw', rotate: 25 } : { y: 0, rotate: 3 }}
-          transition={moiseLeft ? { duration: 1.1, ease: 'easeIn' } : { type: 'spring', stiffness: 90, damping: 11, delay: 0.25 }}
+          animate={moiseLeft ? { x: '130vw', y: '-40vh', rotate: 720, scale: 0.4 } : { y: 0, rotate: 3 }}
+          transition={moiseLeft ? { duration: 1.2, ease: 'easeIn' } : { type: 'spring', stiffness: 90, damping: 11, delay: 0.25 }}
         >
           <CharacterCard character={CHARACTERS.moise} size="lg" />
           <AnimatePresence>{line?.who === 'moise' && <Bubble key={step} text={line.line} side="right" />}</AnimatePresence>
@@ -105,7 +124,9 @@ export function Priestess() {
   const { state, actions } = useRitual();
   const next = useNext();
   useEffect(() => {
-    play('choir');
+    // "In Nomine Patris" carries the healing through the exorcism; the background ducks under it.
+    duckAmbient(true);
+    playTrack('chant');
     // If the judge jumped here directly (← / hotkeys), make sure the rite has begun.
     actions.beginRite();
   }, [actions]);

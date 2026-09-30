@@ -6,6 +6,7 @@ import { SceneIndexContext, StageContext } from './stage';
 import { CandleRail, TopBar } from './hud/Hud';
 import { ScriptureDrawer } from './hud/ScriptureDrawer';
 import { SettingsDrawer } from './hud/SettingsDrawer';
+import { ScrollGuide, useHoverPossession } from './hud/Possession';
 import { Particles } from './fx/Particles';
 import { setMuted, unlockAudio } from './fx/sound';
 import { preloadTracks, stopAllTracks } from './fx/tracks';
@@ -14,7 +15,8 @@ import { Revelation, Sacrifice } from './scenes/ActTwo';
 import { Incident } from './scenes/ActThree';
 import { Builders, Priestess } from './scenes/ActFour';
 import { Exorcism, Possession } from './scenes/ActFive';
-import { Awakening, FinalButton, Report, Reveal } from './scenes/ActSix';
+import { Awakening, FinalButton, Report } from './scenes/ActSix';
+import { Scripture } from './scenes/Finale';
 import './ritual.css';
 
 interface SceneDef {
@@ -40,7 +42,7 @@ const SCENES: SceneDef[] = [
   { id: 'final', Component: FinalButton, rite: 10, chamber: true },
   { id: 'awakening', Component: Awakening, rite: 11, chamber: true },
   { id: 'report', Component: Report, rite: 12, chamber: true },
-  { id: 'reveal', Component: Reveal, rite: 13, chamber: false },
+  { id: 'scripture', Component: Scripture, rite: 13, chamber: true },
 ];
 
 const AUTOPLAY_IDLE_MS = 4500;
@@ -54,6 +56,8 @@ const isTyping = (t: EventTarget | null) =>
 function Stage() {
   const { state, actions } = useRitual();
   const primaryRef = useRef<(() => void) | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  useHoverPossession(rootRef);
   const [primaryKey, setPrimaryKey] = useState('');
 
   const stageApi = useMemo(() => ({
@@ -134,6 +138,7 @@ function Stage() {
   return (
     <StageContext.Provider value={stageApi}>
       <div
+        ref={rootRef}
         className={`ritual ${scene.chamber ? 'ritual--chamber' : ''} ritual--${scene.id}`}
         data-alignment={state.theme === 'dark' ? 'demonic' : 'holy'}
       >
@@ -162,6 +167,7 @@ function Stage() {
             </SceneIndexContext.Provider>
           </motion.main>
         </AnimatePresence>
+        <ScrollGuide rootRef={rootRef} sceneKey={`${state.runId}:${scene.id}`} />
         {scene.rite !== null && <CandleRail rite={scene.rite} />}
         <ScriptureDrawer />
         <SettingsDrawer />

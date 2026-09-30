@@ -426,47 +426,92 @@
 .r-corruption__panel--demonic { border-color: var(--r-blood); box-shadow: 0 0 1.5rem rgb(255 58 82 / 0.4); }
 .r-corruption__panel--demonic code { color: var(--r-blood); }
 
-/* ── Rite V — Incident (Capra surfaces) ──────────────────────────────────── */
+/* ── Rite V — Incident (Capra surfaces), one screen, no scrolling ─────────── */
 
-.r-incident { justify-content: flex-start; align-items: stretch; gap: token('spacing.lg'); padding: 3.5rem token('spacing.lg') 5.5rem; text-align: left; font-family: inherit; }
+.r-incident {
+  justify-content: flex-start;
+  align-items: stretch;
+  gap: clamp(0.4rem, 1.4vh, 0.9rem);
+  height: 100%;
+  min-height: 0;
+  padding: 3.3rem token('spacing.lg') 4.6rem;
+  text-align: left;
+  font-family: inherit;
+}
+
 .r-siren {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: token('spacing.lg');
-  padding: token('spacing.md') token('spacing.lg');
+  padding: token('spacing.sm') token('spacing.lg');
   border-radius: token('radius.md');
   background: token('color.background.danger.solid.default');
   color: token('color.foreground.danger.contrast');
-  font-weight: 700;
-  font-size: clamp(1rem, 2vw, 1.8rem);
-  letter-spacing: 0.04em;
   animation: r-siren 1s ease-in-out infinite;
 }
-.r-siren__id { font-family: var(--r-font-mono); font-size: 0.7em; }
-.r-incident__grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: token('spacing.lg'); }
+.r-siren__title { font-weight: 800; letter-spacing: 0.04em; font-size: clamp(0.95rem, min(1.8vw, 3vh), 1.6rem); }
+.r-siren__meta { font-family: var(--r-font-mono); font-size: clamp(0.65rem, 0.95vw, 0.85rem); opacity: 0.9; text-align: right; }
+
+.r-incident__headline {
+  font-size: clamp(1.3rem, min(3vw, 5vh), 2.6rem);
+  font-weight: 800;
+  line-height: 1.1;
+  color: token('color.foreground.default');
+}
+.r-incident__sub { color: token('color.foreground.danger.default'); }
+
+.r-incident__grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: token('spacing.md');
+}
 .r-incident__kpi { grid-column: span 3; }
-.r-incident__value { display: inline-flex; align-items: center; }
-.r-incident__heresy { grid-column: span 4; }
-.r-incident__routing { grid-column: span 8; }
-.r-incident__sources { grid-column: span 7; }
-.r-incident__scrolls { grid-column: span 5; }
+.r-incident__heresy { grid-column: span 6; min-height: 0; }
+.r-incident__routing { grid-column: span 6; min-height: 0; }
+.r-incident__heresy > *, .r-incident__routing > * { height: 100%; overflow: hidden; }
+
+.r-evidence { display: flex; align-items: center; gap: token('spacing.md'); }
+.r-evidence__emoji { font-size: clamp(1.8rem, min(3.4vw, 6vh), 3rem); filter: drop-shadow(0 0 0.4rem rgb(215 38 61 / 0.35)); animation: r-evidence-bob 2.4s ease-in-out infinite; }
+.r-incident__kpi:nth-child(2) .r-evidence__emoji { animation-delay: 0.3s; }
+.r-incident__kpi:nth-child(3) .r-evidence__emoji { animation-delay: 0.6s; }
+.r-incident__kpi:nth-child(4) .r-evidence__emoji { animation-delay: 0.9s; }
+.r-evidence__body { display: flex; flex-direction: column; min-width: 0; }
+.r-evidence__value { display: inline-flex; align-items: center; font-variant-numeric: tabular-nums; }
+
+.r-heresy-list { list-style: none; display: flex; flex-direction: column; gap: token('spacing.sm'); }
+.r-heresy-list li { display: grid; grid-template-columns: 4.2em 1fr auto; align-items: center; gap: token('spacing.sm'); }
+.r-heresy-list__goats { letter-spacing: -0.15em; }
+
+.r-chains { list-style: none; display: flex; flex-direction: column; gap: token('spacing.sm'); }
+.r-chain { display: flex; flex-wrap: wrap; align-items: center; gap: token('spacing.xs'); }
+.r-chain code { font-family: var(--r-font-mono); font-size: 0.82rem; padding: 0.15em 0.5em; border-radius: token('radius.md'); background: token('color.background.neutral.subtle'); border: 1px solid token('color.border.neutral.subtle'); color: token('color.foreground.default'); }
+.r-chain .r-chain__pipe { background: token('color.background.accent.subtle'); border-color: token('color.border.accent.default'); }
+.r-chain__arrow { animation: r-paw 1.2s steps(2) infinite; }
+
+.r-ticker {
+  display: flex;
+  align-items: center;
+  gap: token('spacing.md');
+  overflow: hidden;
+  padding: token('spacing.xs') token('spacing.md');
+  border-radius: token('radius.md');
+  background: token('color.background.neutral.subtle');
+  border: 1px dashed token('color.border.neutral.default');
+  white-space: nowrap;
+}
+.r-ticker__label { font-weight: 700; font-size: 0.78rem; color: token('color.foreground.subtle'); flex: none; }
+.r-ticker__text { font-family: var(--r-font-mono); font-size: 0.82rem; color: token('color.foreground.default'); animation: r-ticker 14s linear infinite; }
+
 .r-incident__action { display: flex; justify-content: center; }
-.r-incident__sigils { display: inline-flex; gap: token('spacing.xs'); }
-.r-heresy-list, .r-scroll-list { list-style: none; display: flex; flex-direction: column; gap: token('spacing.sm'); }
-.r-heresy-list li { display: flex; align-items: center; gap: token('spacing.sm'); }
-.r-scroll-list li { font-size: 0.85rem; color: token('color.foreground.default'); }
-.r-scroll-list code { color: token('color.foreground.subtle'); margin-right: token('spacing.xs'); }
-.r-routing { width: 100%; height: auto; max-height: 260px; }
-.r-routing__edge { fill: none; stroke: token('color.border.accent.default'); stroke-width: 2; opacity: 0.7; stroke-dasharray: 5 5; animation: r-flow 1.2s linear infinite; }
-.r-routing__node rect { fill: token('color.background.neutral.subtle'); stroke: token('color.border.neutral.default'); }
-.r-routing__node--accent rect { fill: token('color.background.accent.subtle'); stroke: token('color.border.accent.default'); }
-.r-routing__label { font-family: var(--r-font-mono); font-size: 12px; fill: token('color.foreground.default'); }
-.r-routing__caption { font-size: 9px; font-style: italic; fill: token('color.foreground.subtle'); }
-.r-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-.r-table th, .r-table td { text-align: left; padding: token('spacing.xs') token('spacing.sm'); border-bottom: 1px solid token('color.border.neutral.subtle'); }
-.r-table th { color: token('color.foreground.subtle'); font-weight: 600; }
-.r-incident .r-btn--blood { font-size: clamp(1.1rem, 2.2vw, 2.2rem); }
+.r-incident .r-btn--blood { font-size: clamp(1rem, min(2vw, 3.6vh), 2rem); }
+
+@keyframes r-evidence-bob { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-4px) rotate(-6deg); } }
+@keyframes r-paw { 50% { opacity: 0.35; transform: translateX(3px); } }
+@keyframes r-ticker { from { transform: translateX(40%); } to { transform: translateX(-100%); } }
 
 /* ── Rite VI — Builders ──────────────────────────────────────────────────── */
 
@@ -488,6 +533,9 @@
   z-index: 4;
 }
 .r-bubble--left { left: 70%; }
+.r-builders__slot--guilty { animation: r-shake 0.4s ease-in-out 3; }
+.r-sweat { position: absolute; top: 8%; right: -0.6rem; z-index: 5; font-size: clamp(1.6rem, 3vw, 2.6rem); animation: r-sweat 1.2s ease-in infinite; }
+@keyframes r-sweat { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(3rem); opacity: 0; } }
 .r-bubble--right { right: 70%; }
 
 /* ── Rite VII — Priestess ────────────────────────────────────────────────── */
@@ -551,6 +599,19 @@
 .r-resisted__goats code { font-family: var(--r-font-mono); font-size: clamp(0.7rem, min(1.1vw, 1.9vh), 1.05rem); }
 .r-resisted__goats .r-resisted__field { color: var(--r-blood); font-weight: 700; }
 .r-json { text-align: left; font-size: clamp(0.65rem, 0.9vw, 0.9rem); padding: 0.5rem 0.8rem; border-radius: 0.5rem; background: var(--r-panel); border: 1px solid var(--r-blood); color: var(--r-ink); max-width: 26rem; white-space: pre-wrap; word-break: break-word; }
+
+.r-exorcism__stage { position: relative; display: flex; flex-direction: column; align-items: center; gap: clamp(0.4rem, 1.3vh, 1rem); width: 100%; }
+.r-exorcism__altar { position: relative; z-index: 3; display: flex; align-items: center; justify-content: center; gap: clamp(1.5rem, 6vw, 6rem); }
+.r-exorcism__altar .r-beam { width: calc(clamp(1.5rem, 6vw, 6rem) + min(40vh, 32vw) * 0.32 + 1rem); }
+.r-exorcism__dread { position: fixed; inset: 0; z-index: 2; pointer-events: none; background: radial-gradient(ellipse at center, transparent 28%, rgb(110 0 18 / calc(var(--tension, 0) * 0.8))); transition: background 900ms ease; }
+.r-circle .r-exorcism__goat { width: 100%; }
+.r-exorcism__stage[data-tension='2'] .r-circle { animation: r-tremor 0.3s steps(2) infinite; }
+.r-exorcism__stage[data-tension='3'] .r-circle,
+.r-exorcism__stage[data-tension='3'] .r-caster .tarot { animation: r-tremor-hard 0.11s steps(2) infinite; }
+.r-exorcism__stage[data-tension='3'] .r-progress { box-shadow: 0 0 2.5rem rgb(255 58 82 / 0.7); }
+.r-exorcism .r-rite__node, .r-exorcism .r-rite__end { padding: 0.45rem 0.5rem; min-width: clamp(5.5rem, 9.5vw, 10rem); }
+@keyframes r-tremor { 0% { translate: 1px -1px; } 100% { translate: -1px 1px; } }
+@keyframes r-tremor-hard { 0% { translate: 3px -2px; } 100% { translate: -3px 2px; } }
 
 /* ── Rite IX — Possession ────────────────────────────────────────────────── */
 
@@ -636,6 +697,73 @@
 .r-settings__row { display: flex; align-items: flex-start; gap: token('spacing.md'); cursor: pointer; }
 .r-settings__row > span { display: flex; flex-direction: column; gap: token('spacing.xs'); }
 .r-settings__select { padding: token('spacing.sm'); border-radius: token('radius.md'); border: 1px solid token('color.border.neutral.default'); background: token('color.background.surface'); color: token('color.foreground.default'); }
+
+/* ── Possessed hover (a random variant per hover, see hud/Possession.tsx) ─────── */
+
+.r-btn[data-possessed='jitter'] { animation: r-hover-jitter 0.18s steps(2) infinite; filter: hue-rotate(40deg) saturate(1.4); }
+.r-btn[data-possessed='melt'] { animation: r-hover-melt 0.9s ease-in forwards; }
+.r-btn[data-possessed='melt']::after {
+  content: '';
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: 92%;
+  height: 0;
+  background: radial-gradient(circle at 20% 0, currentColor 0 35%, transparent 36%) 0 0 / 22% 100%, linear-gradient(currentColor, currentColor) 10% 0 / 6% 100% no-repeat, linear-gradient(currentColor, currentColor) 55% 0 / 5% 70% no-repeat, linear-gradient(currentColor, currentColor) 85% 0 / 6% 90% no-repeat;
+  color: var(--r-blood);
+  animation: r-drip 0.9s ease-in forwards;
+  pointer-events: none;
+}
+.r-btn[data-possessed='eyes']::before {
+  content: '👁️ 👁️';
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  translate: -50% 0;
+  font-size: 0.8em;
+  letter-spacing: 0.3em;
+  animation: r-peek 0.35s ease-out forwards, r-blink-eyes 1.6s 0.35s infinite;
+  pointer-events: none;
+}
+.r-btn[data-possessed='eyes'] { box-shadow: 0 0 2.4em rgb(255 58 82 / 0.7); }
+.r-btn[data-possessed='flip'] { animation: r-hover-flip 0.55s cubic-bezier(0.5, 1.8, 0.4, 0.8) forwards; }
+.r-card-btn { position: relative; }
+.r-card-btn[data-possessed='jitter'] .tarot { animation: r-hover-jitter 0.18s steps(2) infinite; }
+.r-card-btn[data-possessed='melt'] .tarot { animation: r-hover-melt 0.9s ease-in forwards; }
+.r-card-btn[data-possessed='eyes'] .tarot { box-shadow: 0 0 3rem rgb(255 58 82 / 0.8); }
+.r-card-btn[data-possessed='eyes']::before { content: '👁️ 👁️'; position: absolute; left: 50%; top: -1.6em; translate: -50% 0; font-size: 1.6rem; animation: r-peek 0.35s ease-out forwards; z-index: 4; }
+.r-card-btn[data-possessed='flip'] .tarot { animation: r-hover-flip 0.55s cubic-bezier(0.5, 1.8, 0.4, 0.8) forwards; }
+
+@keyframes r-hover-jitter { 0% { transform: translate(2px, -1px) rotate(1.5deg) scale(1.05); } 100% { transform: translate(-2px, 2px) rotate(-2deg) scale(1.07); } }
+@keyframes r-hover-melt { 0% { transform: none; } 100% { transform: skewX(-6deg) scaleY(1.12); filter: blur(0.6px); } }
+@keyframes r-drip { to { height: 1.1em; } }
+@keyframes r-peek { from { opacity: 0; translate: -50% 0.6em; } to { opacity: 1; translate: -50% 0; } }
+@keyframes r-blink-eyes { 0%, 90%, 100% { opacity: 1; } 95% { opacity: 0.1; } }
+@keyframes r-hover-flip { to { transform: rotate(180deg) scale(1.05); } }
+
+/* ── Scroll guide ─────────────────────────────────────────────────────────── */
+
+.r-scroll-guide {
+  position: absolute;
+  left: 50%;
+  bottom: 4.6rem;
+  translate: -50% 0;
+  z-index: 6;
+  padding: 0.55em 1.3em;
+  border-radius: 999px;
+  border: 2px solid var(--r-gold);
+  background: var(--r-panel);
+  color: var(--r-gold);
+  font-family: var(--r-font-display);
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  font-size: clamp(0.8rem, 1.3vw, 1.2rem);
+  cursor: pointer;
+  box-shadow: 0 0 1.5em var(--r-glow);
+  animation: r-guide-bounce 1.1s ease-in-out infinite;
+}
+
+@keyframes r-guide-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
 
 /* ── Keyframes ───────────────────────────────────────────────────────────── */
 
