@@ -21,16 +21,22 @@ export function audioAllowed(): boolean {
   return ctx?.state === 'running' || ua?.hasBeenActive === true;
 }
 
-export function unlockAudio(): void {
+/** The shared context and master bus. Creating it needs no gesture (it starts suspended). */
+export function audioBus(): { ctx: AudioContext; master: GainNode } | null {
   if (!ctx) {
     const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AC) return;
+    if (!AC) return null;
     ctx = new AC();
     master = ctx.createGain();
     master.gain.value = muted ? 0 : 0.55;
     master.connect(ctx.destination);
   }
-  if (ctx.state === 'suspended') void ctx.resume();
+  return master ? { ctx, master } : null;
+}
+
+export function unlockAudio(): void {
+  const bus = audioBus();
+  if (bus && bus.ctx.state === 'suspended') void bus.ctx.resume();
 }
 
 export function setMuted(on: boolean): void {
